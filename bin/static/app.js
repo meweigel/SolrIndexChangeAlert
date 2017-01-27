@@ -14,77 +14,82 @@
  * limitations under the License.
  */
 
-
-
 var stompClient = null;
 
 function setConnected(connected) {
-    $("#connect").prop("disabled", connected);
-    $("#disconnect").prop("disabled", !connected);
-    $("#radioSet").prop("disabled", !connected);
-    
-    if (connected) {
-        $("#conversation").show();
-    }
-    else {
-        $("#conversation").hide();
-    }
-    $("#indexChangeAlert").html("");
+	$("#connect").prop("disabled", connected);
+	$("#disconnect").prop("disabled", !connected);
+	$("#radioSet").prop("disabled", !connected);
+
+	if (connected) {
+		$("#conversation").show();
+	} else {
+		$("#conversation").hide();
+	}
+	$("#indexChangeAlert").html("");
 }
 
 function connect() {
-    var socket = new SockJS('/gs-guide-websocket');
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
-        setConnected(true);
-        console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/responseMessage', function (response) {
-            showMessageAlert(JSON.parse(response.body).content);
-        });
-        stompClient.send("/topic/responseMessage", {}, JSON.stringify({'content': 'Success: ' + frame}));
-    });
+	var socket = new SockJS('/gs-guide-websocket');
+	stompClient = Stomp.over(socket);
+	stompClient.connect({}, function(frame) {
+		setConnected(true);
+		console.log('Connected: ' + frame);
+		stompClient.subscribe('/topic/responseMessage', function(response) {
+			showMessageAlert(JSON.parse(response.body).content);
+		});
+		stompClient.send("/topic/responseMessage", {}, JSON.stringify({
+			'content' : 'Success: ' + frame
+		}));
+	});
 }
 
 function disconnect() {
-    if (stompClient != null) {
-        stompClient.disconnect();
-    }
-    setConnected(false);
-    console.log("Disconnected");
+	if (stompClient != null) {
+		stompClient.disconnect();
+	}
+	setConnected(false);
+	console.log("Disconnected");
 }
-
 
 function sendMessage(selectValue) {
-	var msg = "{'alert': '" + selectValue + "'}";
-    stompClient.send("/app/alertMessage", {}, JSON.stringify({'alert': selectValue}));
+	stompClient.send("/app/alertMessage", {}, JSON.stringify({
+		'alert' : selectValue
+	}));
 }
 
-function clearTable(){
+function clearTable() {
 	$("#conversation > tbody").html("");
 }
 
 function showMessageAlert(message) {
-    $("#indexChangeAlert").append("<tr><td>" + message + "</td></tr>");
-    $("#indexChangeAlert").scroll(function(){
-        $("span").text(x += 1);
-    });
+	$("#indexChangeAlert").append("<tr><td>" + message + "</td></tr>");
+	$("#indexChangeAlert").scroll(function() {
+		$("span").text(x += 1);
+	});
 }
 
-$(function () {
-    $("form").on('submit', function (e) {
-        e.preventDefault();
-    });
-    $( "#connect" ).click(function() { connect(); });
-    $( "#disconnect" ).click(function() { disconnect(); });
-    $( "#start" ).click(function() {
-        var selectValue = $('input[name=rbnNumber]:checked').val(); 
-        sendMessage(selectValue);
-    });
-    $( "#stop" ).click(function() {
-        var selectValue = $('input[name=rbnNumber]:checked').val(); 
-        sendMessage(selectValue);
-    });
-    $( "#clear" ).click(function() { clearTable(); });
+$(function() {
+	$("form").on('submit', function(e) {
+		e.preventDefault();
+	});
+	$("#connect").click(function() {
+		connect();
+	});
+	$("#disconnect").click(function() {
+		disconnect();
+	});
+	$("#start").click(function() {
+		var selectValue = $('input[name=rbnNumber]:checked').val();
+		sendMessage(selectValue);
+	});
+	$("#stop").click(function() {
+		var selectValue = $('input[name=rbnNumber]:checked').val();
+		sendMessage(selectValue);
+	});
+	$("#clear").click(function() {
+		clearTable();
+	});
 });
 
 $("#tableId > tbody").html("");

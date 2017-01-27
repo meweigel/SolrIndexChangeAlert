@@ -1,6 +1,5 @@
 package com.prototype.model;
 
-
 /*
  * Copyright 2014 the original author or authors.
  *
@@ -17,12 +16,11 @@ package com.prototype.model;
  * limitations under the License.
  */
 
-
 /**
  * 
  * @author mweigel
  *
- * The Response Message
+ *         The Response Message
  */
 public class ResponseMessage {
 	private String content;

@@ -16,13 +16,11 @@ package com.prototype.model;
  * limitations under the License.
  */
 
-
-
 /**
  * 
  * @author mweigel
  *
- * The Alert Message class
+ *         The Alert Message class
  */
 public class AlertMessage {
 	private String alert;

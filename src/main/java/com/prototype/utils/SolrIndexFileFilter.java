@@ -2,7 +2,7 @@ package com.prototype.utils;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.HashMap;
+import java.util.HashSet;
 
 /*
  * Copyright 2014 the original author or authors.
@@ -20,8 +20,6 @@ import java.util.HashMap;
  * limitations under the License.
  */
 
-
-
 /**
  * 
  * @author mweigel
@@ -30,12 +28,12 @@ import java.util.HashMap;
  *         indexes
  */
 public class SolrIndexFileFilter implements FileFilter {
-	private static final HashMap<String, Boolean> hashMap;
+	private static final HashSet<String> hashSet;
 
 	static {
-		hashMap = new HashMap<String, Boolean>();
+		hashSet = new HashSet<String>();
 		for (String key : AppConstants.INDEX_FILE_EXTS) {
-			hashMap.put(key, true);
+			hashSet.add(key);
 		}
 	}
 
@@ -45,21 +43,14 @@ public class SolrIndexFileFilter implements FileFilter {
 	@Override
 	public boolean accept(File file) {
 
-		// If not a file we want to return true
-		// so that no exception is thrown.
-		boolean result = true;
+		boolean result = false;
 
 		if (file.isFile()) {
 			String name = file.getName();
 			int i = name.indexOf('.') + 1;
-			
+
 			if (i > 0) {
-				String key = name.substring(i);
-				if (hashMap.containsKey(key)) {
-					result = hashMap.get(key);
-				}else{
-					result = false;
-				}
+				result = hashSet.contains(name.substring(i));
 			}
 		}
 

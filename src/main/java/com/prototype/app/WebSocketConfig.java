@@ -8,7 +8,6 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 
 import com.prototype.utils.AppConstants;
 
-
 /*
  * Copyright 2014 the original author or authors.
  *
@@ -25,10 +24,9 @@ import com.prototype.utils.AppConstants;
  * limitations under the License.
  */
 
-
 /**
- * The WebSocketConfig responsibility is the Message Broker
- * and register Stomp Messasge endpoints
+ * The WebSocketConfig responsibility is the Message Broker and register Stomp
+ * Messasge endpoints
  * 
  * @author mweigel
  *
@@ -45,8 +43,9 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		// The SockJS client will attempt to connect to "/gs-guide-websocket" and
-		// use the best transport available (websocket, xhr-streaming, xhr-polling, etc).
+		// The SockJS client will attempt to connect to "/gs-guide-websocket"
+		// and use the best transport available (websocket, xhr-streaming,
+		// xhr-polling, etc).
 		registry.addEndpoint(AppConstants.WS_ENDPOINT).withSockJS();
 	}
 }

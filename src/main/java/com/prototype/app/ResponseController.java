@@ -1,6 +1,8 @@
 package com.prototype.app;
 
 import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
@@ -10,7 +12,6 @@ import com.prototype.model.AlertMessage;
 import com.prototype.model.ResponseMessage;
 import com.prototype.utils.AppConstants;
 import com.prototype.utils.IndexChangeMonitorUtil;
-
 
 /*
  * Copyright 2014 the original author or authors.
@@ -28,10 +29,11 @@ import com.prototype.utils.IndexChangeMonitorUtil;
  * limitations under the License.
  */
 
-
 @Controller
 public class ResponseController {
-
+	private static final String HEADER_MSG = "ResponseController: ";
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResponseController.class);
+	
 	private boolean started = false;
 	private FileAlterationMonitor monitorRef;
 
@@ -39,7 +41,7 @@ public class ResponseController {
 	 * The incoming messages from APP_POINT are processed by onMessageReceived,
 	 * then routed to TOPIC_ENDPOINT
 	 * 
-	 * @param message - The incoming AlertMessage
+	 * @param message : The incoming AlertMessage
 	 * @return ResponseMessage
 	 * @throws Exception
 	 */
@@ -47,19 +49,21 @@ public class ResponseController {
 	@SendTo(AppConstants.TOPIC_ENDPOINT)
 	public ResponseMessage onMessageReceived(AlertMessage message) throws Exception {
 
-		System.out.println("ResponseController: onMessageReceived() " + message.getAlert());
+		//System.out.println("ResponseController: onMessageReceived() " + message.getAlert());
+		LOGGER.info(HEADER_MSG + "onMessageReceived() " + message.getAlert());
 
-		// StompMessageClient will run as background thread when onMessageReceived 
-		// receives a "start" message.
-		
+
 		String msg = message.getAlert().toLowerCase();
+
 		
+		// StompMessageClient will run as background thread when
+		// onMessageReceived receives a "start" message.
 		if (!started && msg.equals("start")) {
 			try {
 				started = true;
 				message.setAlert("The Solr index change montitor was started");
-				monitorRef = IndexChangeMonitorUtil.monitorSolr(
-						new StompMessageClient(AppConstants.WS_ENDPOINT, AppConstants.TOPIC_ENDPOINT));
+				monitorRef = IndexChangeMonitorUtil
+						.monitorSolr(new StompMessageClient(AppConstants.WS_ENDPOINT, AppConstants.TOPIC_ENDPOINT));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

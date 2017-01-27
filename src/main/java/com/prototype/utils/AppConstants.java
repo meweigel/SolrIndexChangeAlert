@@ -16,7 +16,6 @@ package com.prototype.utils;
  * limitations under the License.
  */
 
-
 //TODO - These should be put in a properties file later
 public final class AppConstants {
 	public static final String INDEX_FOLDER = "/cots/solr-6.4.0/collection1/data/index";
@@ -25,6 +24,7 @@ public final class AppConstants {
 	public static final String WS_ENDPOINT = "/gs-guide-websocket";
 	public static final String PROXY_HOST = "127.0.0.1";
 	public static final String PROXY_PORT = "8080";
-	public static final String[] INDEX_FILE_EXTS = { "doc", "dvd", "dvm", "fdt", "fdx", "fnm", "lock", "nvd", "nvm", "pos", "si", "tim", "tip"};
+	public static final String[] INDEX_FILE_EXTS = { "doc", "dvd", "dvm", "fdt", "fdx", "fnm", "lock", "nvd", "nvm",
+			"pos", "si", "tim", "tip" };
 	public static final int POLL_INTERVAL = 2000; // Milliseconds
 }

@@ -24,20 +24,18 @@ import com.prototype.utils.SolrIndexFileFilter;
  * limitations under the License.
  */
 
-
-
 /**
  * 
  * @author mweigel
  * 
- * A JUNIT test class for the SolrIndexFileFilterTest
+ *         A JUNIT test class for the SolrIndexFileFilterTest
  */
 public class SolrIndexFileFilterTest {
 
 	private static final String FALSE_FILES_PATH = "/src/test/resources/falseIndexFiles";
 	private static final String TRUE_FILES_PATH = "/src/test/resources/trueIndexFiles";
-	private File[] falseFileArray;
-	private File[] trueFileArray;
+	private static File[] falseFileArray;
+	private static File[] trueFileArray;
 
 	@Before
 	public void setUp() {

@@ -36,7 +36,6 @@ import com.prototype.model.AlertMessage;
 import com.prototype.model.ResponseMessage;
 import com.prototype.utils.AppConstants;
 
-
 /*
  * Copyright 2014 the original author or authors.
  *
@@ -53,15 +52,13 @@ import com.prototype.utils.AppConstants;
  * limitations under the License.
  */
 
-
-
 /**
  * 
  * @author mweigel
  * 
- * Integration test for the SolrIndexChangeAlert Web Application.
- * This integration test will test web application Websocket 
- * communication to and from Websocket endpoints.
+ *         Integration test for the SolrIndexChangeAlert Web Application. This
+ *         integration test will test web application Websocket communication to
+ *         and from Websocket endpoints.
  *
  */
 @ContextConfiguration(classes = SolrIndexChangeAlertApp.class)
@@ -69,103 +66,98 @@ import com.prototype.utils.AppConstants;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class SolrIndexChangeIntegrationTests {
 
+	@LocalServerPort
+	private int port;
 
-	    @LocalServerPort
-	    private int port;
+	private SockJsClient sockJsClient;
 
-	    private SockJsClient sockJsClient;
+	private WebSocketStompClient stompClient;
 
-	    private WebSocketStompClient stompClient;
+	private final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
-	    private final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+	@Before
+	public void setup() {
+		List<Transport> transports = new ArrayList<>();
+		transports.add(new WebSocketTransport(new StandardWebSocketClient()));
+		this.sockJsClient = new SockJsClient(transports);
 
-	    @Before
-	    public void setup() {
-	        List<Transport> transports = new ArrayList<>();
-	        transports.add(new WebSocketTransport(new StandardWebSocketClient()));
-	        this.sockJsClient = new SockJsClient(transports);
-
-	        this.stompClient = new WebSocketStompClient(sockJsClient);
-	        this.stompClient.setMessageConverter(new MappingJackson2MessageConverter());
-	    }
-
-	    @Test
-	    public void getResponseMessage() throws Exception {
-
-	        final CountDownLatch latch = new CountDownLatch(1);
-	        final AtomicReference<Throwable> failure = new AtomicReference<>();
-
-	        StompSessionHandler handler = new TestSessionHandler(failure) {
-
-	            @Override
-	            public void afterConnected(final StompSession session, StompHeaders connectedHeaders) {
-	                session.subscribe(AppConstants.TOPIC_ENDPOINT, new StompFrameHandler() {
-	                    @Override
-	                    public Type getPayloadType(StompHeaders headers) {
-	                        return ResponseMessage.class;
-	                    }
-
-	                    @Override
-	                    public void handleFrame(StompHeaders headers, Object payload) {
-	                    	ResponseMessage responseMessage = (ResponseMessage) payload;
-	                        try {
-	                            assertEquals("Solr Index has changed", responseMessage.getContent());
-	                        } catch (Throwable t) {
-	                            failure.set(t);
-	                        } finally {
-	                            session.disconnect();
-	                            latch.countDown();
-	                        }
-	                    }
-	                });
-	                try {
-	                    session.send("/app"+AppConstants.APP_ENDPOINT, new AlertMessage("Solr Index has changed"));
-	                } catch (Throwable t) {
-	                    failure.set(t);
-	                    latch.countDown();
-	                }
-	            }
-	        };
-
-	        
-	        String url = "ws://" + AppConstants.PROXY_HOST + ":{port}" + AppConstants.WS_ENDPOINT;
-	        
-	        
-	        this.stompClient.connect(url, this.headers, handler, this.port);
-
-	        if (latch.await(3, TimeUnit.SECONDS)) {
-	            if (failure.get() != null) {
-	                throw new AssertionError("", failure.get());
-	            }
-	        }
-	        else {
-	            fail("ResponseMessage not received");
-	        }
-
-	    }
-
-	    private class TestSessionHandler extends StompSessionHandlerAdapter {
-
-	        private final AtomicReference<Throwable> failure;
-
-
-	        public TestSessionHandler(AtomicReference<Throwable> failure) {
-	            this.failure = failure;
-	        }
-
-	        @Override
-	        public void handleFrame(StompHeaders headers, Object payload) {
-	            this.failure.set(new Exception(headers.toString()));
-	        }
-
-	        @Override
-	        public void handleException(StompSession s, StompCommand c, StompHeaders h, byte[] p, Throwable ex) {
-	            this.failure.set(ex);
-	        }
-
-	        @Override
-	        public void handleTransportError(StompSession session, Throwable ex) {
-	            this.failure.set(ex);
-	        }
-	    }
+		this.stompClient = new WebSocketStompClient(sockJsClient);
+		this.stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 	}
+
+	@Test
+	public void getResponseMessage() throws Exception {
+
+		final CountDownLatch latch = new CountDownLatch(1);
+		final AtomicReference<Throwable> failure = new AtomicReference<>();
+
+		StompSessionHandler handler = new TestSessionHandler(failure) {
+
+			@Override
+			public void afterConnected(final StompSession session, StompHeaders connectedHeaders) {
+				session.subscribe(AppConstants.TOPIC_ENDPOINT, new StompFrameHandler() {
+					@Override
+					public Type getPayloadType(StompHeaders headers) {
+						return ResponseMessage.class;
+					}
+
+					@Override
+					public void handleFrame(StompHeaders headers, Object payload) {
+						ResponseMessage responseMessage = (ResponseMessage) payload;
+						try {
+							assertEquals("Solr Index has changed", responseMessage.getContent());
+						} catch (Throwable t) {
+							failure.set(t);
+						} finally {
+							session.disconnect();
+							latch.countDown();
+						}
+					}
+				});
+				try {
+					session.send("/app" + AppConstants.APP_ENDPOINT, new AlertMessage("Solr Index has changed"));
+				} catch (Throwable t) {
+					failure.set(t);
+					latch.countDown();
+				}
+			}
+		};
+
+		String url = "ws://" + AppConstants.PROXY_HOST + ":{port}" + AppConstants.WS_ENDPOINT;
+
+		this.stompClient.connect(url, this.headers, handler, this.port);
+
+		if (latch.await(3, TimeUnit.SECONDS)) {
+			if (failure.get() != null) {
+				throw new AssertionError("", failure.get());
+			}
+		} else {
+			fail("ResponseMessage not received");
+		}
+
+	}
+
+	private class TestSessionHandler extends StompSessionHandlerAdapter {
+
+		private final AtomicReference<Throwable> failure;
+
+		public TestSessionHandler(AtomicReference<Throwable> failure) {
+			this.failure = failure;
+		}
+
+		@Override
+		public void handleFrame(StompHeaders headers, Object payload) {
+			this.failure.set(new Exception(headers.toString()));
+		}
+
+		@Override
+		public void handleException(StompSession s, StompCommand c, StompHeaders h, byte[] p, Throwable ex) {
+			this.failure.set(ex);
+		}
+
+		@Override
+		public void handleTransportError(StompSession session, Throwable ex) {
+			this.failure.set(ex);
+		}
+	}
+}

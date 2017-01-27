@@ -44,14 +44,14 @@ import java.util.List;
  * 
  * @author mweigel
  *
- *         The StompMessageClient class allows Stomp messages to be sent to
- *         subscriber endpoints enabling poccess control and intervention.
+ * The StompMessageClient class allows Stomp messages to be sent to
+ * subscriber endpoints enabling poccess control and intervention.
  */
 public class StompMessageClient {
-
+	private static final String HEADER_MSG = "StompMessageClient: ";
 	private static final Logger LOGGER = LoggerFactory.getLogger(StompMessageClient.class);
 	private static StompSession theSession;
-	private SockJsClient sockJsClient;
+	private static SockJsClient sockJsClient;
 	private static WebSocketStompClient stompClient;
 
 	/**
@@ -61,7 +61,6 @@ public class StompMessageClient {
 	 * @param topicEndPoint - The subscriber topic endpoint
 	 */
 	public StompMessageClient(String wsEndpoint, String topicEndPoint) {
-
 
 		System.setProperty("proxyHost", AppConstants.PROXY_HOST);
 		System.setProperty("proxyPort", AppConstants.PROXY_PORT);
@@ -103,11 +102,11 @@ public class StompMessageClient {
 	 * @param message
 	 *            The plain text message (not yet JSON)
 	 */
-	public static void sendMessage(String message) {
+	public void sendMessage(String message) {
 		try {
 			StompMessageClient.theSession.send("/app" + AppConstants.APP_ENDPOINT, new AlertMessage(message));
 		} catch (Throwable t) {
-			t.printStackTrace();
+			LOGGER.error(HEADER_MSG + "sendMessage() " + t.toString());
 		}
 	}
 }

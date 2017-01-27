@@ -20,7 +20,6 @@ import org.springframework.context.annotation.ComponentScan;
  * limitations under the License.
  */
 
-
 /**
  * 
  * @author mweigel
@@ -28,7 +27,7 @@ import org.springframework.context.annotation.ComponentScan;
  * The Spring Boot main method
  */
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.prototype"})
+@ComponentScan(basePackages = { "com.prototype" })
 public class SolrIndexChangeAlertApp {
 
 	public static void main(String[] args) {
