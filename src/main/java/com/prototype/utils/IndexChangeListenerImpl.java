@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.prototype.app.ResponseController;
 import com.prototype.client.StompMessageClient;
 
+
 /*
  * Copyright 2014 the original author or authors.
  *

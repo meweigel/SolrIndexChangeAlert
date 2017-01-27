@@ -65,8 +65,7 @@ public class ResponseController {
 				monitorRef = IndexChangeMonitorUtil
 						.monitorSolr(new StompMessageClient(AppConstants.WS_ENDPOINT, AppConstants.TOPIC_ENDPOINT));
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error(HEADER_MSG + "onMessageReceived() " + e.toString());
 			}
 		} else if (msg.equals("stop")) {
 			monitorRef.stop();

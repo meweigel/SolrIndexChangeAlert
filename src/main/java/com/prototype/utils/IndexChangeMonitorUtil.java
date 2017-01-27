@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.prototype.client.StompMessageClient;
+import com.prototype.utils.AppConstants;
 
 /*
  * Copyright 2014 the original author or authors.

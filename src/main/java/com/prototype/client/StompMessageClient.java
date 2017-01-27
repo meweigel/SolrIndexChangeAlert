@@ -1,8 +1,5 @@
 package com.prototype.client;
 
-import com.prototype.model.AlertMessage;
-import com.prototype.model.ResponseMessage;
-import com.prototype.utils.AppConstants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +15,10 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
+
+import com.prototype.model.AlertMessage;
+import com.prototype.model.ResponseMessage;
+import com.prototype.utils.AppConstants;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -110,3 +111,5 @@ public class StompMessageClient {
 		}
 	}
 }
+
+

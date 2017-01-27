@@ -24,11 +24,11 @@ Change Montitor background thread. This thread is running a FileAlterationMonito
 has a reference to a FileAlterationObserver. The FileAlterationObserver will observe file
 alterations and then invoke a registered IndexChangeListenerImpl event listener. The
 IndexChangeListenerImpl has a reference to an instance of a StompMessageClient that it
-uses to send AlertMessages to the  Websocket application endpoint /app/alertMessage. The incoming
-AlertMessages are then reveived by the contoller of the Solr Index Change Alert service and are
-processed by its onMessageReceived method, which then routes ResponseMessages to the subscribed
-topic endpoint /topic/responseMessage which the web browser client is subscribed to. The messages
-will then be displayed in a table for review.
+uses to send AlertMessages to the  Websocket application endpoint /app/alertMessage. The
+incoming AlertMessages are then received by the contoller of the Solr Index Change Alert
+service and are processed by its onMessageReceived method, which then routes ResponseMessages
+to the subscribed topic endpoint /topic/responseMessage which the web browser client is
+subscribed to. The messages will then be displayed in a table for review.
 
 
    When something is added/removed/changed to the Solr indexs, a message is sent to the web 
