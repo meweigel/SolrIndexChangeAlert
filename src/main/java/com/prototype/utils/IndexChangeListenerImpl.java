@@ -53,7 +53,7 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 	 */
 	@Override
 	public void onStart(final FileAlterationObserver observer) {
-		LOGGER.info(HEADER_MSG + "onStart() called because FileAlterationObserver started");
+		//LOGGER.info(HEADER_MSG + "onStart() called because FileAlterationObserver started");
 	}
 
 	/**
@@ -145,6 +145,6 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 	 */
 	@Override
 	public void onStop(final FileAlterationObserver observer) {
-		LOGGER.info(HEADER_MSG + "onStop() called because FileAlterationObserver stopped");
+		//LOGGER.info(HEADER_MSG + "onStop() called because FileAlterationObserver stopped");
 	}
 }
