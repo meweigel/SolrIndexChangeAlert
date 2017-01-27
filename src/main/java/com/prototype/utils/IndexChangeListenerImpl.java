@@ -34,7 +34,6 @@ import com.prototype.client.StompMessageClient;
  *         events occur
  */
 public class IndexChangeListenerImpl implements FileAlterationListener {
-	private static final String HEADER_MSG = "IndexChangeListenerImpl: ";
 	private static final Logger LOGGER = LoggerFactory.getLogger(IndexChangeListenerImpl.class);
 	private final StompMessageClient client;
 
@@ -53,7 +52,7 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 	 */
 	@Override
 	public void onStart(final FileAlterationObserver observer) {
-		//LOGGER.info(HEADER_MSG + "onStart() called because FileAlterationObserver started");
+		//LOGGER.info("onStart() called because FileAlterationObserver started");
 	}
 
 	/**
@@ -63,7 +62,7 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 	public void onDirectoryCreate(final File directory) {
 		try {
 			String msg = "Directory - " + directory.getName() + " was created";
-			LOGGER.info(HEADER_MSG + "onDirectoryCreate() " + msg);
+			LOGGER.info("onDirectoryCreate() " + msg);
 			client.sendMessage(msg);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -77,7 +76,7 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 	public void onDirectoryChange(final File directory) {
 		try {
 			String msg = "Directory - " + directory.getName() + " was changed";
-			LOGGER.info(HEADER_MSG + "onDirectoryChange() " + msg);
+			LOGGER.info("onDirectoryChange() " + msg);
 			client.sendMessage(msg);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -91,7 +90,7 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 	public void onDirectoryDelete(final File directory) {
 		try {
 			String msg = "Directory - " + directory.getName() + " was deleted";
-			LOGGER.info(HEADER_MSG + "onDirectoryDelete() " + msg);
+			LOGGER.info("onDirectoryDelete() " + msg);
 			client.sendMessage(msg);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -105,7 +104,7 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 	public void onFileCreate(final File file) {
 		try {
 			String msg = "File - " + file.getName() + " was created";
-			LOGGER.info(HEADER_MSG + "onFileCreate() " + msg);
+			LOGGER.info("onFileCreate() " + msg);
 			client.sendMessage(msg);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -119,7 +118,7 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 	public void onFileChange(final File file) {
 		try {
 			String msg = "File - " + file.getName() + " was changed";
-			LOGGER.info(HEADER_MSG + "onFileChange() " + msg);
+			LOGGER.info("onFileChange() " + msg);
 			client.sendMessage(msg);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -133,7 +132,7 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 	public void onFileDelete(final File file) {
 		try {
 			String msg = "File - " + file.getName() + " was deleted";
-			LOGGER.info(HEADER_MSG + "onFileDelete() " + msg);
+			LOGGER.info("onFileDelete() " + msg);
 			client.sendMessage(msg);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -145,6 +144,6 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 	 */
 	@Override
 	public void onStop(final FileAlterationObserver observer) {
-		//LOGGER.info(HEADER_MSG + "onStop() called because FileAlterationObserver stopped");
+		//LOGGER.info("onStop() called because FileAlterationObserver stopped");
 	}
 }

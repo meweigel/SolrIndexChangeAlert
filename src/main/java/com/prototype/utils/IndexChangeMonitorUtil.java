@@ -34,7 +34,6 @@ import com.prototype.utils.AppConstants;
  *         lterations
  */
 public class IndexChangeMonitorUtil {
-	private static final String HEADER_MSG = "IndexChangeMonitorUtil: ";
 	private static final Logger LOGGER = LoggerFactory.getLogger(IndexChangeMonitorUtil.class);
 	
 	
@@ -70,7 +69,7 @@ public class IndexChangeMonitorUtil {
 		// Start the FileAlterationMonitor thread
 		monitor.start();
 		
-		LOGGER.info(HEADER_MSG + "monitorSolr() The FileAlterationMonitor thread was started");
+		LOGGER.info("monitorSolr() The FileAlterationMonitor thread was started");
 
 		return monitor;
 	}

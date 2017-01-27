@@ -49,7 +49,6 @@ import java.util.List;
  * subscriber endpoints enabling poccess control and intervention.
  */
 public class StompMessageClient {
-	private static final String HEADER_MSG = "StompMessageClient: ";
 	private static final Logger LOGGER = LoggerFactory.getLogger(StompMessageClient.class);
 	private static StompSession theSession;
 	private static SockJsClient sockJsClient;
@@ -107,7 +106,7 @@ public class StompMessageClient {
 		try {
 			StompMessageClient.theSession.send("/app" + AppConstants.APP_ENDPOINT, new AlertMessage(message));
 		} catch (Throwable t) {
-			LOGGER.error(HEADER_MSG + "sendMessage() " + t.toString());
+			LOGGER.error("sendMessage() " + t.toString());
 		}
 	}
 }

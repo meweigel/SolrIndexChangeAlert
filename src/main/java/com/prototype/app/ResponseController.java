@@ -31,7 +31,6 @@ import com.prototype.utils.IndexChangeMonitorUtil;
 
 @Controller
 public class ResponseController {
-	private static final String HEADER_MSG = "ResponseController: ";
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResponseController.class);
 	
 	private boolean started = false;
@@ -50,7 +49,7 @@ public class ResponseController {
 	public ResponseMessage onMessageReceived(AlertMessage message) throws Exception {
 
 		//System.out.println("ResponseController: onMessageReceived() " + message.getAlert());
-		LOGGER.info(HEADER_MSG + "onMessageReceived() " + message.getAlert());
+		LOGGER.info("onMessageReceived() " + message.getAlert());
 
 
 		String msg = message.getAlert().toLowerCase();
@@ -65,7 +64,7 @@ public class ResponseController {
 				monitorRef = IndexChangeMonitorUtil
 						.monitorSolr(new StompMessageClient(AppConstants.WS_ENDPOINT, AppConstants.TOPIC_ENDPOINT));
 			} catch (Exception e) {
-				LOGGER.error(HEADER_MSG + "onMessageReceived() " + e.toString());
+				LOGGER.error("onMessageReceived() " + e.toString());
 			}
 		} else if (msg.equals("stop")) {
 			monitorRef.stop();
