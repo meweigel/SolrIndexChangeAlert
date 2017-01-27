@@ -49,5 +49,14 @@ INDEX_FOLDER = "/cots/solr-6.4.0/collection1/data/index";
 
 
 
+TODO:
+
+   Simplify the Front End UI by getting rid of the radio buttons for turning on/off 
+the index file monitoring. This action will then be incorporated into the 
+WebSocket connection: connect switch.
+
+   Add a properties file to replace com.prototype.utils.AppConstants so that recompliling
+will not be necessary.
+
 
 
