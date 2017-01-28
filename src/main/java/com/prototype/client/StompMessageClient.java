@@ -49,6 +49,7 @@ import java.util.List;
  */
 public class StompMessageClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StompMessageClient.class);
+	private static StompMessageClient stompMessageClient = null;
 	private StompSession theSession;
 
 	/**
@@ -103,7 +104,11 @@ public class StompMessageClient {
 	 * @return StompMessageClient
 	 */
 	public static StompMessageClient getInstance(String wsEndpoint, String topicEndPoint) {
-		return new StompMessageClient(wsEndpoint, topicEndPoint);
+		if(stompMessageClient == null){
+			stompMessageClient = new StompMessageClient(wsEndpoint, topicEndPoint);
+		}
+		
+		return stompMessageClient;
 	}
 
 	/**
