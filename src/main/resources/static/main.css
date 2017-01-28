@@ -18,7 +18,7 @@ body {
 }
 
 #main-content {
-	max-width: 950px;
+	max-width: 900px;
 	padding: 2em 3em;
 	margin: 0 auto 20px;
 	background-color: #fff;
@@ -28,31 +28,13 @@ body {
 	border-radius: 5px;
 }
 
-div#info {
-	position: absolute;
-	right: 180px;
-}
-
 h1#title {
 	margin: 10px 5px 70px;
 	text-align: center;
 }
 
-div#radioSet {
-	padding: 2px;
-	margin: 10px;
-}
-
 button#clear {
-	margin: 10px 1px 1px 45px;
-}
-
-input#start {
-	margin: 1px 1px 1px 90px;
-}
-
-input#stop {
-	margin: 1px 1px 1px 90px;
+	margin: 45px 0px 0px 45px;
 }
 
 table thead tr {

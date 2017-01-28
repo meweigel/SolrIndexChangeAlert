@@ -40,8 +40,10 @@ dependencies {
     compile("org.webjars:stomp-websocket:2.3.3")
     compile("org.webjars:bootstrap:3.3.7")
     compile("org.webjars:jquery:3.1.0")
-	compile('org.springframework.boot:spring-boot-starter-data-solr')
+    compile("org.slf4j:log4j-over-slf4j:1.7.22")
+    compile('org.springframework.boot:spring-boot-starter-data-solr')
 	
     testCompile("org.springframework.boot:spring-boot-starter-test")
 }
 
+    

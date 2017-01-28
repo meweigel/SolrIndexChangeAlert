@@ -34,7 +34,6 @@ import com.prototype.utils.AppConstants;
  *         lterations
  */
 public class IndexChangeMonitorUtil {
-	private static final String HEADER_MSG = "IndexChangeMonitorUtil: ";
 	private static final Logger LOGGER = LoggerFactory.getLogger(IndexChangeMonitorUtil.class);
 	
 	
@@ -55,10 +54,8 @@ public class IndexChangeMonitorUtil {
 		FileAlterationObserver observer = new FileAlterationObserver(directory, new SolrIndexFileFilter());
 
 		// Add a IndexChangeListenerImpl that has a reference to an instance of
-		// a StompMessageClient
-		// The listener is invoked when an index change event happens, and uses
-		// StompMessageClient to
-		// send a message to a Websocket topic endpoint.
+		// a StompMessageClient. The listener is invoked when an index change event happens, 
+		// and uses StompMessageClient to send a message to a Websocket topic endpoint.
 		observer.addListener(new IndexChangeListenerImpl(client));
 
 		FileAlterationMonitor monitor = new FileAlterationMonitor(AppConstants.POLL_INTERVAL);
@@ -70,7 +67,7 @@ public class IndexChangeMonitorUtil {
 		// Start the FileAlterationMonitor thread
 		monitor.start();
 		
-		LOGGER.info(HEADER_MSG + "monitorSolr() The FileAlterationMonitor thread was started");
+		LOGGER.info("monitorSolr() The FileAlterationMonitor thread was started");
 
 		return monitor;
 	}

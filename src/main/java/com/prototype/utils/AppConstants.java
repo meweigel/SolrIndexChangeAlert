@@ -27,4 +27,7 @@ public final class AppConstants {
 	public static final String[] INDEX_FILE_EXTS = { "doc", "dvd", "dvm", "fdt", "fdx", "fnm", "lock", "nvd", "nvm",
 			"pos", "si", "tim", "tip" };
 	public static final int POLL_INTERVAL = 2000; // Milliseconds
+	public static final String START_INDEX_MONITOR = "startIndexMonitor";
+	public static final String STOP_INDEX_MONITOR = "stopIndexMonitor";
+	public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 }
