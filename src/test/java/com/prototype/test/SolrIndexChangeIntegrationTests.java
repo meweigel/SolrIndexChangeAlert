@@ -105,7 +105,7 @@ public class SolrIndexChangeIntegrationTests {
 					public void handleFrame(StompHeaders headers, Object payload) {
 						ResponseMessage responseMessage = (ResponseMessage) payload;
 						try {
-							assertEquals("Solr Index has changed", responseMessage.getContent());
+							assertTrue(responseMessage.getContent().contains("Solr Index has changed"));
 						} catch (Throwable t) {
 							failure.set(t);
 						} finally {

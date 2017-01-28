@@ -1,5 +1,8 @@
 package com.prototype.app;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +38,12 @@ public class ResponseController {
 	
 	private boolean started = false;
 	private FileAlterationMonitor monitorRef;
+	private static SimpleDateFormat dateFormatter = new SimpleDateFormat();
 
+	static{
+		dateFormatter.applyPattern(AppConstants.DATE_FORMAT);
+	}
+	
 	/**
 	 * The incoming messages from APP_POINT are processed by onMessageReceived,
 	 * then routed to TOPIC_ENDPOINT
@@ -48,30 +56,33 @@ public class ResponseController {
 	@SendTo(AppConstants.TOPIC_ENDPOINT)
 	public ResponseMessage onMessageReceived(AlertMessage message) throws Exception {
 
-		//System.out.println("ResponseController: onMessageReceived() " + message.getAlert());
+
 		LOGGER.info("onMessageReceived() " + message.getAlert());
 
-
-		String msg = message.getAlert().toLowerCase();
+		Date dateTime = new Date(System.currentTimeMillis());
+		
+		String msg = message.getAlert();
 
 		
 		// StompMessageClient will run as background thread when
 		// onMessageReceived receives a "start" message.
-		if (!started && msg.equals("start")) {
+		if (!started && msg.equals(AppConstants.START_INDEX_MONITOR)) {
 			try {
-				started = true;
-				message.setAlert("The Solr index change montitor was started");
 				StompMessageClient client = StompMessageClient.getInstance(AppConstants.WS_ENDPOINT, AppConstants.TOPIC_ENDPOINT);
 				monitorRef = IndexChangeMonitorUtil.monitorSolr(client);
+				message.setAlert(dateFormatter.format(dateTime) + " : The Solr index change montitor was started");
 				LOGGER.info("onMessageReceived() " + message.getAlert());
+				started = true;
 			} catch (Exception e) {
 				LOGGER.error("onMessageReceived() " + e.toString());
 			}
-		} else if (msg.equals("stop")) {
+		} else if (msg.equals(AppConstants.STOP_INDEX_MONITOR)) {
 			monitorRef.stop();
 			started = false;
-			message.setAlert("The Solr index change montitor was stopped");
+			message.setAlert(dateFormatter.format(dateTime) + " : The Solr index change montitor was stopped");
 			LOGGER.info("onMessageReceived() " + message.getAlert());
+		}else{
+			message.setAlert(dateFormatter.format(dateTime) + " : " + message.getAlert());
 		}
 
 		return new ResponseMessage(message.getAlert());

@@ -15,6 +15,8 @@
  */
 
 var stompClient = null;
+var START_INDEX_MONITOR = "startIndexMonitor";
+var STOP_INDEX_MONITOR = "stopIndexMonitor";
 
 function setConnected(connected) {
 	$("#connect").prop("disabled", connected);
@@ -53,9 +55,7 @@ function disconnect() {
 }
 
 function sendMessage(selectValue) {
-	stompClient.send("/app/alertMessage", {}, JSON.stringify({
-		'alert' : selectValue
-	}));
+	stompClient.send("/app/alertMessage", {}, JSON.stringify({'alert' : selectValue}));
 }
 
 function clearTable() {
@@ -76,27 +76,14 @@ $(function() {
 	
 	$("#connect").click(function() {
 		connect();
+		setTimeout(function(){sendMessage(START_INDEX_MONITOR)}, 1000);
 	});
 	
 	$("#disconnect").click(function() {
-		var selectValue = $('input[name=rbnNumber]:checked').val();
-		if(selectValue != "stop"){
-			$("#stop").prop("checked", true);
-			sendMessage("stop");
-		}
-		
-		setTimeout(disconnect(),3000);
+		sendMessage(STOP_INDEX_MONITOR);
+		setTimeout(function(){disconnect()}, 1000);
 	});
 	
-	$("#start").click(function() {
-		var selectValue = $('input[name=rbnNumber]:checked').val();
-		sendMessage(selectValue);
-	});
-	
-	$("#stop").click(function() {
-		var selectValue = $('input[name=rbnNumber]:checked').val();
-		sendMessage(selectValue);
-	});
 	
 	$("#clear").click(function() {
 		clearTable();
@@ -104,3 +91,4 @@ $(function() {
 });
 
 $("#tableId > tbody").html("");
+
