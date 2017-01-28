@@ -61,8 +61,9 @@ public class ResponseController {
 			try {
 				started = true;
 				message.setAlert("The Solr index change montitor was started");
-				monitorRef = IndexChangeMonitorUtil
-						.monitorSolr(new StompMessageClient(AppConstants.WS_ENDPOINT, AppConstants.TOPIC_ENDPOINT));
+				StompMessageClient client = StompMessageClient.getInstance(AppConstants.WS_ENDPOINT, AppConstants.TOPIC_ENDPOINT);
+				monitorRef = IndexChangeMonitorUtil.monitorSolr(client);
+				LOGGER.info("onMessageReceived() " + message.getAlert());
 			} catch (Exception e) {
 				LOGGER.error("onMessageReceived() " + e.toString());
 			}
@@ -70,6 +71,7 @@ public class ResponseController {
 			monitorRef.stop();
 			started = false;
 			message.setAlert("The Solr index change montitor was stopped");
+			LOGGER.info("onMessageReceived() " + message.getAlert());
 		}
 
 		return new ResponseMessage(message.getAlert());

@@ -54,10 +54,8 @@ public class IndexChangeMonitorUtil {
 		FileAlterationObserver observer = new FileAlterationObserver(directory, new SolrIndexFileFilter());
 
 		// Add a IndexChangeListenerImpl that has a reference to an instance of
-		// a StompMessageClient
-		// The listener is invoked when an index change event happens, and uses
-		// StompMessageClient to
-		// send a message to a Websocket topic endpoint.
+		// a StompMessageClient. The listener is invoked when an index change event happens, 
+		// and uses StompMessageClient to send a message to a Websocket topic endpoint.
 		observer.addListener(new IndexChangeListenerImpl(client));
 
 		FileAlterationMonitor monitor = new FileAlterationMonitor(AppConstants.POLL_INTERVAL);

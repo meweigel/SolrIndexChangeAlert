@@ -1,6 +1,5 @@
 package com.prototype.client;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -40,36 +39,36 @@ import java.util.List;
  * limitations under the License.
  */
 
-
 /**
  * 
  * @author mweigel
  *
- * The StompMessageClient class allows Stomp messages to be sent to
- * subscriber endpoints enabling poccess control and intervention.
+ *  The singleton StompMessageClient class allows Stomp messages to be sent
+ *  to subscriber endpoints enabling poccess control and intervention.
+ *  We only want one instance of this class ever - Singleton
  */
 public class StompMessageClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StompMessageClient.class);
-	private static StompSession theSession;
-	private static SockJsClient sockJsClient;
-	private static WebSocketStompClient stompClient;
+	private StompSession theSession;
 
 	/**
-	 * The single parameterized constructor
+	 * The private singleton parameterized constructor
 	 * 
-	 * @param wsEndpoint - The SockJS client connection endpoint
-	 * @param topicEndPoint - The subscriber topic endpoint
+	 * @param wsEndpoint
+	 *            - The SockJS client connection endpoint
+	 * @param topicEndPoint
+	 *            - The subscriber topic endpoint
 	 */
-	public StompMessageClient(String wsEndpoint, String topicEndPoint) {
+	private StompMessageClient(String wsEndpoint, String topicEndPoint) {
 
 		System.setProperty("proxyHost", AppConstants.PROXY_HOST);
 		System.setProperty("proxyPort", AppConstants.PROXY_PORT);
 
 		List<Transport> transports = new ArrayList<>();
 		transports.add(new WebSocketTransport(new StandardWebSocketClient()));
-		this.sockJsClient = new SockJsClient(transports);
-		StompMessageClient.stompClient = new WebSocketStompClient(sockJsClient);
-		StompMessageClient.stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+		SockJsClient sockJsClient = new SockJsClient(transports);
+		WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
+		stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
 		String url = "ws://" + AppConstants.PROXY_HOST + ":" + AppConstants.PROXY_PORT + "/" + wsEndpoint;
 
@@ -84,7 +83,7 @@ public class StompMessageClient {
 
 					@Override
 					public void handleFrame(StompHeaders headers, Object payload) {
-						ResponseMessage responseMessage = (ResponseMessage) payload;
+						// ResponseMessage responseMessage = (ResponseMessage) payload;
 					}
 				});
 
@@ -96,6 +95,18 @@ public class StompMessageClient {
 	}
 
 	/**
+	 * The user acces point to retrieving an instance of the StompMessageClient class
+	 * @param wsEndpoint
+	 *            - The SockJS client connection endpoint
+	 * @param topicEndPoint
+	 *            - The subscriber topic endpoint
+	 * @return StompMessageClient
+	 */
+	public static StompMessageClient getInstance(String wsEndpoint, String topicEndPoint) {
+		return new StompMessageClient(wsEndpoint, topicEndPoint);
+	}
+
+	/**
 	 * The sendMessage client method for sending Stomp messages to the
 	 * topicEndPoint
 	 * 
@@ -104,11 +115,9 @@ public class StompMessageClient {
 	 */
 	public void sendMessage(String message) {
 		try {
-			StompMessageClient.theSession.send("/app" + AppConstants.APP_ENDPOINT, new AlertMessage(message));
+			theSession.send("/app" + AppConstants.APP_ENDPOINT, new AlertMessage(message));
 		} catch (Throwable t) {
 			LOGGER.error("sendMessage() " + t.toString());
 		}
 	}
 }
-
-

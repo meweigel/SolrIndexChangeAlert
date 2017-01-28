@@ -73,20 +73,31 @@ $(function() {
 	$("form").on('submit', function(e) {
 		e.preventDefault();
 	});
+	
 	$("#connect").click(function() {
 		connect();
 	});
+	
 	$("#disconnect").click(function() {
-		disconnect();
+		var selectValue = $('input[name=rbnNumber]:checked').val();
+		if(selectValue != "stop"){
+			$("#stop").prop("checked", true);
+			sendMessage("stop");
+		}
+		
+		setTimeout(disconnect(),3000);
 	});
+	
 	$("#start").click(function() {
 		var selectValue = $('input[name=rbnNumber]:checked').val();
 		sendMessage(selectValue);
 	});
+	
 	$("#stop").click(function() {
 		var selectValue = $('input[name=rbnNumber]:checked').val();
 		sendMessage(selectValue);
 	});
+	
 	$("#clear").click(function() {
 		clearTable();
 	});

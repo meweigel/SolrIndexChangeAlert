@@ -25,8 +25,8 @@ import com.prototype.utils.AppConstants;
  */
 
 /**
- * The WebSocketConfig responsibility is the Message Broker and register Stomp
- * Messasge endpoints
+ * The WebSocketConfig responsibility is to configure the Message Broker 
+ * and register the Stomp Messasge endpoints
  * 
  * @author mweigel
  *
