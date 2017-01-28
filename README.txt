@@ -8,7 +8,7 @@
 
 Purpose:
 
-   Solr Index Change Alert is a Web application developed using Spring Boot, that
+   Solr Index Change Alert is a WebSocket application developed using Spring Boot, that
 is used to monitor Apache Solr Index files for any type of alterations/changes and the
 creation of new index files and the deletion of existing index files. The web application
 utilizes WebSocket protocol communication between the client browser and the service 
