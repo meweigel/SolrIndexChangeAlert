@@ -2,8 +2,12 @@ package com.prototype.app;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Spliterator;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
 
 import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -14,6 +18,7 @@ import com.prototype.client.StompMessageClient;
 import com.prototype.model.AlertMessage;
 import com.prototype.model.ResponseMessage;
 import com.prototype.utils.AppConstants;
+import com.prototype.utils.IndexChangeListenerImpl;
 import com.prototype.utils.IndexChangeMonitorUtil;
 
 /*
@@ -32,23 +37,31 @@ import com.prototype.utils.IndexChangeMonitorUtil;
  * limitations under the License.
  */
 
+/**
+ * 
+ * @author mweigel
+ *
+ *
+ * This clas controls the routing and processing of WebSocket messages
+ */
 @Controller
 public class ResponseController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResponseController.class);
-	
+
 	private boolean started = false;
 	private FileAlterationMonitor monitorRef;
 	private static SimpleDateFormat dateFormatter = new SimpleDateFormat();
 
-	static{
+	static {
 		dateFormatter.applyPattern(AppConstants.DATE_FORMAT);
 	}
-	
+
 	/**
 	 * The incoming messages from APP_POINT are processed by onMessageReceived,
 	 * then routed to TOPIC_ENDPOINT
 	 * 
-	 * @param message : The incoming AlertMessage
+	 * @param message
+	 *            : The incoming AlertMessage
 	 * @return ResponseMessage
 	 * @throws Exception
 	 */
@@ -56,22 +69,21 @@ public class ResponseController {
 	@SendTo(AppConstants.TOPIC_ENDPOINT)
 	public ResponseMessage onMessageReceived(AlertMessage message) throws Exception {
 
-
 		LOGGER.info("onMessageReceived() " + message.getAlert());
 
 		Date dateTime = new Date(System.currentTimeMillis());
-		
-		String msg = message.getAlert();
 
-		
+		String msg = message.getAlert();
+		boolean bool = msg.contains("true");
+
 		// StompMessageClient will run as background thread when
 		// onMessageReceived receives a "start" message.
 		if (!started && msg.equals(AppConstants.START_INDEX_MONITOR)) {
 			try {
-				StompMessageClient client = StompMessageClient.getInstance(AppConstants.WS_ENDPOINT, AppConstants.TOPIC_ENDPOINT);
+				StompMessageClient client = StompMessageClient.getInstance(AppConstants.WS_ENDPOINT,
+						AppConstants.TOPIC_ENDPOINT);
 				monitorRef = IndexChangeMonitorUtil.monitorSolr(client);
 				message.setAlert(dateFormatter.format(dateTime) + " : The Solr index change montitor was started");
-				LOGGER.info("onMessageReceived() " + message.getAlert());
 				started = true;
 			} catch (Exception e) {
 				LOGGER.error("onMessageReceived() " + e.toString());
@@ -80,11 +92,30 @@ public class ResponseController {
 			monitorRef.stop();
 			started = false;
 			message.setAlert(dateFormatter.format(dateTime) + " : The Solr index change montitor was stopped");
-			LOGGER.info("onMessageReceived() " + message.getAlert());
-		}else{
+		} else if (msg.contains(AppConstants.WATCH_DIR_CREATE)) {
+			IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchDirectoryCreate(bool);
+			message.setAlert(dateFormatter.format(dateTime) + " : Watching for directory creation: " + bool);
+		} else if (msg.contains(AppConstants.WATCH_DIR_CHANGE)) {
+			IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchDirectoryChange(bool);
+			message.setAlert(dateFormatter.format(dateTime) + " : Watching for directory change: " + bool);
+		} else if (msg.contains(AppConstants.WATCH_DIR_DELETE)) {
+			IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchDirectoryDelete(bool);
+			message.setAlert(dateFormatter.format(dateTime) + " : Watching for directory deletion: " + bool);
+		} else if (msg.contains(AppConstants.WATCH_FILE_CREATE)) {
+			IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchFileCreate(bool);
+			message.setAlert(dateFormatter.format(dateTime) + " : Watching for file creation: " + bool);
+		} else if (msg.contains(AppConstants.WATCH_FILE_CHANGE)) {
+			IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchFileChange(bool);
+			message.setAlert(dateFormatter.format(dateTime) + " : Watching for file change: " + bool);
+		} else if (msg.contains(AppConstants.WATCH_FILE_DELETE)) {
+			IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchFileDelete(bool);
+			message.setAlert(dateFormatter.format(dateTime) + " : Watching for file deletion: " + bool);
+		} else {
 			message.setAlert(dateFormatter.format(dateTime) + " : " + message.getAlert());
 		}
-
+		
+		LOGGER.info("onMessageReceived() " + message.getAlert());
+		
 		return new ResponseMessage(message.getAlert());
 	}
 }

@@ -17,11 +17,17 @@
 var stompClient = null;
 var START_INDEX_MONITOR = "startIndexMonitor";
 var STOP_INDEX_MONITOR = "stopIndexMonitor";
+var WATCH_DIR_CREATE = "watchDirCreate";
+var WATCH_DIR_CHANGE = "watchDirChange";
+var WATCH_DIR_DELETE = "watchDirDelete";
+var WATCH_FILE_CREATE = "watchFileCreate";
+var WATCH_FILE_CHANGE = "watchFileChange";
+var WATCH_FILE_DELETE = "watchFileDelete";
 
 function setConnected(connected) {
 	$("#connect").prop("disabled", connected);
 	$("#disconnect").prop("disabled", !connected);
-	$("#radioSet").prop("disabled", !connected);
+	$("#checkboxSet").prop("disabled", !connected);
 
 	if (connected) {
 		$("#conversation").show();
@@ -80,11 +86,65 @@ $(function() {
 	});
 	
 	$("#disconnect").click(function() {
+		$("#directoryCreate").prop("checked", false);	
+		$("#directoryChange").prop("checked", false);
+		$("#directoryDelete").prop("checked", false);
+		$("#fileCreate").prop("checked", false);
+		$("#fileChange").prop("checked", false);
+		$("#fileDelete").prop("checked", false);
 		sendMessage(STOP_INDEX_MONITOR);
 		setTimeout(function(){disconnect()}, 1000);
 	});
 	
 	
+    $('input#directoryCreate').change(function() {
+        if($('input[id=directoryCreate]').is(':checked')){
+        	sendMessage(WATCH_DIR_CREATE + ":true");
+        }else{
+          	sendMessage(WATCH_DIR_CREATE + ":false");
+        }
+    });
+    
+    $('input#directoryChange').change(function() {
+        if($('input[id=directoryChange]').is(':checked')){
+        	sendMessage(WATCH_DIR_CHANGE + ":true");
+        }else{
+          	sendMessage(WATCH_DIR_CHANGE + ":false");
+        }
+    });
+    
+    $('input#directoryDelete').change(function() {
+        if($('input[id=directoryDelete]').is(':checked')){
+        	sendMessage(WATCH_DIR_DELETE + ":true");
+        }else{
+          	sendMessage(WATCH_DIR_DELETE + ":false");
+        }
+    });
+     
+    $('input#fileCreate').change(function() {
+        if($('input[id=fileCreate]').is(':checked')){
+        	sendMessage(WATCH_FILE_CREATE + ":true");
+        }else{
+          	sendMessage(WATCH_FILE_CREATE + ":false");
+        }
+    });
+        
+    $('input#fileChange').change(function() {
+        if($('input[id=fileChange]').is(':checked')){
+        	sendMessage(WATCH_FILE_CHANGE + ":true");
+        }else{
+          	sendMessage(WATCH_FILE_CHANGE + ":false");
+        }
+    });
+        
+    $('input#fileDelete').change(function() {
+        if($('input[id=fileDelete]').is(':checked')){
+        	sendMessage(WATCH_FILE_DELETE + ":true");
+        }else{
+          	sendMessage(WATCH_FILE_DELETE + ":false");
+        }
+    });
+    
 	$("#clear").click(function() {
 		clearTable();
 	});

@@ -18,9 +18,9 @@ body {
 }
 
 #main-content {
-	max-width: 900px;
+	max-width: 850px;
 	padding: 2em 3em;
-	margin: 0 auto 20px;
+	margin: 0px auto 25px;
 	background-color: #fff;
 	border: 1px solid #e5e5e5;
 	-webkit-border-radius: 5px;
@@ -29,12 +29,18 @@ body {
 }
 
 h1#title {
-	margin: 10px 5px 70px;
+	margin: 10px 5px 30px;
 	text-align: center;
 }
 
+fieldset#checkboxSet {
+    padding: 5px;
+    margin: 40px 40px 20px;
+}
+
+
 button#clear {
-	margin: 45px 0px 0px 45px;
+	margin: 30px 0px 0px 45px;
 }
 
 table thead tr {

@@ -44,7 +44,7 @@ import java.util.List;
  * @author mweigel
  *
  *  The singleton StompMessageClient class allows Stomp messages to be sent
- *  to subscriber endpoints enabling poccess control and intervention.
+ *  to subscriber endpoints enabling proccess control and intervention.
  *  We only want one instance of this class ever - Singleton
  */
 public class StompMessageClient {

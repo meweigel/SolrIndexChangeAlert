@@ -52,6 +52,8 @@ public class SolrIndexFileFilter implements FileFilter {
 			if (i > 0) {
 				result = hashSet.contains(name.substring(i));
 			}
+		}else if(file.isDirectory()){
+			result = true;
 		}
 
 		return result;

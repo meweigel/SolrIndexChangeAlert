@@ -30,13 +30,13 @@ import com.prototype.utils.AppConstants;
  * 
  * @author mweigel
  *
- *         The IndexChangeMonitorUtil is a utility class for Monitor FileA
- *         lterations
+ *         The IndexChangeMonitorUtil is a utility class for Monitor File
+ *         alterations.
  */
 public class IndexChangeMonitorUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IndexChangeMonitorUtil.class);
-	
-	
+	private static IndexChangeListenerImpl indexChangeListenerImpl;
+
 	/**
 	 * The indexing monitoring thread
 	 * 
@@ -54,9 +54,12 @@ public class IndexChangeMonitorUtil {
 		FileAlterationObserver observer = new FileAlterationObserver(directory, new SolrIndexFileFilter());
 
 		// Add a IndexChangeListenerImpl that has a reference to an instance of
-		// a StompMessageClient. The listener is invoked when an index change event happens, 
-		// and uses StompMessageClient to send a message to a Websocket topic endpoint.
-		observer.addListener(new IndexChangeListenerImpl(client));
+		// a StompMessageClient. The listener is invoked when an index change
+		// event happens,
+		// and uses StompMessageClient to send a message to a Websocket topic
+		// endpoint.
+		indexChangeListenerImpl = new IndexChangeListenerImpl(client);
+		observer.addListener(indexChangeListenerImpl);
 
 		FileAlterationMonitor monitor = new FileAlterationMonitor(AppConstants.POLL_INTERVAL);
 
@@ -66,9 +69,13 @@ public class IndexChangeMonitorUtil {
 
 		// Start the FileAlterationMonitor thread
 		monitor.start();
-		
+
 		LOGGER.info("monitorSolr() The FileAlterationMonitor thread was started");
 
 		return monitor;
+	}
+
+	public static IndexChangeListenerImpl getIndexChangeListenerImpl() {
+		return indexChangeListenerImpl;
 	}
 }

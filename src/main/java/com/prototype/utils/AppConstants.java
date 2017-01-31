@@ -29,5 +29,12 @@ public final class AppConstants {
 	public static final int POLL_INTERVAL = 2000; // Milliseconds
 	public static final String START_INDEX_MONITOR = "startIndexMonitor";
 	public static final String STOP_INDEX_MONITOR = "stopIndexMonitor";
+	public static final String WATCH_DIR_CREATE = "watchDirCreate";
+	public static final String WATCH_DIR_CHANGE = "watchDirChange";
+	public static final String WATCH_DIR_DELETE = "watchDirDelete";
+	public static final String WATCH_FILE_CREATE = "watchFileCreate";
+	public static final String WATCH_FILE_CHANGE = "watchFileChange";
+	public static final String WATCH_FILE_DELETE = "watchFileDelete";
+
 	public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 }
