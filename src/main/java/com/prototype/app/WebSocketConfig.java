@@ -23,11 +23,10 @@ import com.prototype.utils.AppConstants;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
- * The WebSocketConfig responsibility is to configure the Message Broker 
- * and register the Stomp Message endpoints
- * 
+ * The WebSocketConfig responsibility is to configure the Message Broker and
+ * register the Stomp Message endpoints
+ *
  * @author mweigel
  *
  */
@@ -35,17 +34,17 @@ import com.prototype.utils.AppConstants;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
-	@Override
-	public void configureMessageBroker(MessageBrokerRegistry config) {
-		config.enableSimpleBroker("/topic");
-		config.setApplicationDestinationPrefixes("/app");
-	}
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        config.enableSimpleBroker("/topic");
+        config.setApplicationDestinationPrefixes("/app");
+    }
 
-	@Override
-	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		// The SockJS client will attempt to connect to "/gs-guide-websocket"
-		// and use the best transport available (websocket, xhr-streaming,
-		// xhr-polling, etc).
-		registry.addEndpoint(AppConstants.WS_ENDPOINT).withSockJS();
-	}
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // The SockJS client will attempt to connect to "/gs-guide-websocket"
+        // and use the best transport available (websocket, xhr-streaming,
+        // xhr-polling, etc).
+        registry.addEndpoint(AppConstants.WS_ENDPOINT).withSockJS();
+    }
 }

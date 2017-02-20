@@ -15,25 +15,25 @@ package com.prototype.model;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
- * 
+ *
  * @author mweigel
  *
- *         The Response Message
+ * The Response Message
  */
 public class ResponseMessage {
-	private String content;
 
-	public ResponseMessage() {
+    private String content;
 
-	}
+    public ResponseMessage() {
 
-	public ResponseMessage(String content) {
-		this.content = content;
-	}
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public ResponseMessage(String content) {
+        this.content = content;
+    }
+
+    public String getContent() {
+        return content;
+    }
 }

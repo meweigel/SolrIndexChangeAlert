@@ -19,18 +19,17 @@ import org.springframework.context.annotation.ComponentScan;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
- * 
+ *
  * @author mweigel
  *
  * The Spring Boot main method
  */
 @SpringBootApplication
-@ComponentScan(basePackages = { "com.prototype" })
+@ComponentScan(basePackages = {"com.prototype"})
 public class SolrIndexChangeAlertApp {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SolrIndexChangeAlertApp.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SolrIndexChangeAlertApp.class, args);
+    }
 }

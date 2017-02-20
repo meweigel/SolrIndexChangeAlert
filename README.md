@@ -46,9 +46,9 @@ constants that have to be changed before compiling. You must also change the con
 INDEX_FOLDER and add the actual full path to your Solr core index files directory before
 compiling. This constants file will be replaced later with a properties file.
 
-PROXY_HOST = "127.0.0.1";
-PROXY_PORT = "8080";
-INDEX_FOLDER = "/cots/solr-6.4.0/collection1/data/index";
+* PROXY_HOST = "127.0.0.1";
+* PROXY_PORT = "8080";
+* INDEX_FOLDER = "/cots/solr-6.4.0/collection1/data/index";
 
 
 

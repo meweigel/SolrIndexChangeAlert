@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.prototype.client.StompMessageClient;
-import com.prototype.utils.AppConstants;
 
 /*
  * Copyright 2014 the original author or authors.
@@ -25,57 +24,56 @@ import com.prototype.utils.AppConstants;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
- * 
+ *
  * @author mweigel
  *
- *         The IndexChangeMonitorUtil is a utility class for Monitor File
- *         alterations.
+ * The IndexChangeMonitorUtil is a utility class for Monitor File alterations.
  */
 public class IndexChangeMonitorUtil {
-	private static final Logger LOGGER = LoggerFactory.getLogger(IndexChangeMonitorUtil.class);
-	private static IndexChangeListenerImpl indexChangeListenerImpl;
 
-	/**
-	 * The indexing monitoring thread
-	 * 
-	 * @param client
-	 *            StompMessageClient used for routing messages to a subscribed
-	 *            endpoint
-	 * 
-	 * @throws Exception
-	 */
-	public static FileAlterationMonitor monitorSolr(StompMessageClient client) throws Exception {
-		File directory = new File(AppConstants.INDEX_FOLDER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexChangeMonitorUtil.class);
+    private static IndexChangeListenerImpl indexChangeListenerImpl;
 
-		// Create an instance of a FileAlterationObserver that is given a
-		// SolrIndexFileFilter.
-		FileAlterationObserver observer = new FileAlterationObserver(directory, new SolrIndexFileFilter());
+    /**
+     * The indexing monitoring thread
+     *
+     * @param client StompMessageClient used for routing messages to a
+     * subscribed endpoint
+     * @return FileAlterationMonitor
+     *
+     * @throws Exception
+     */
+    public static FileAlterationMonitor monitorSolr(StompMessageClient client) throws Exception {
+        File directory = new File(AppConstants.INDEX_FOLDER);
 
-		// Add a IndexChangeListenerImpl that has a reference to an instance of
-		// a StompMessageClient. The listener is invoked when an index change
-		// event happens,
-		// and uses StompMessageClient to send a message to a Websocket topic
-		// endpoint.
-		indexChangeListenerImpl = new IndexChangeListenerImpl(client);
-		observer.addListener(indexChangeListenerImpl);
+        // Create an instance of a FileAlterationObserver that is given a
+        // SolrIndexFileFilter.
+        FileAlterationObserver observer = new FileAlterationObserver(directory, new SolrIndexFileFilter());
 
-		FileAlterationMonitor monitor = new FileAlterationMonitor(AppConstants.POLL_INTERVAL);
+        // Add a IndexChangeListenerImpl that has a reference to an instance of
+        // a StompMessageClient. The listener is invoked when an index change
+        // event happens,
+        // and uses StompMessageClient to send a message to a Websocket topic
+        // endpoint.
+        indexChangeListenerImpl = new IndexChangeListenerImpl(client);
+        observer.addListener(indexChangeListenerImpl);
 
-		// The FileAlterationObserver will observe file alterations and then
-		// invoke the IndexChangeListenerImpl
-		monitor.addObserver(observer);
+        FileAlterationMonitor monitor = new FileAlterationMonitor(AppConstants.POLL_INTERVAL);
 
-		// Start the FileAlterationMonitor thread
-		monitor.start();
+        // The FileAlterationObserver will observe file alterations and then
+        // invoke the IndexChangeListenerImpl
+        monitor.addObserver(observer);
 
-		LOGGER.info("monitorSolr() The FileAlterationMonitor thread was started");
+        // Start the FileAlterationMonitor thread
+        monitor.start();
 
-		return monitor;
-	}
+        LOGGER.info("monitorSolr() The FileAlterationMonitor thread was started");
 
-	public static IndexChangeListenerImpl getIndexChangeListenerImpl() {
-		return indexChangeListenerImpl;
-	}
+        return monitor;
+    }
+
+    public static IndexChangeListenerImpl getIndexChangeListenerImpl() {
+        return indexChangeListenerImpl;
+    }
 }

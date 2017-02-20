@@ -38,91 +38,88 @@ import java.util.List;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
- * 
+ *
  * @author mweigel
  *
- *  The singleton StompMessageClient class allows Stomp messages to be sent
- *  to subscriber endpoints enabling proccess control and intervention.
- *  We only want one instance of this class ever - Singleton
+ * The singleton StompMessageClient class allows Stomp messages to be sent to
+ * subscriber endpoints enabling proccess control and intervention. We only want
+ * one instance of this class ever - Singleton
  */
 public class StompMessageClient {
-	private static final Logger LOGGER = LoggerFactory.getLogger(StompMessageClient.class);
-	private static StompMessageClient stompMessageClient = null;
-	private StompSession theSession;
 
-	/**
-	 * The private singleton parameterized constructor
-	 * 
-	 * @param wsEndpoint
-	 *            - The SockJS client connection endpoint
-	 * @param topicEndPoint
-	 *            - The subscriber topic endpoint
-	 */
-	private StompMessageClient(String wsEndpoint, String topicEndPoint) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StompMessageClient.class);
+    private static StompMessageClient stompMessageClient = null;
+    private StompSession theSession;
 
-		System.setProperty("proxyHost", AppConstants.PROXY_HOST);
-		System.setProperty("proxyPort", AppConstants.PROXY_PORT);
+    /**
+     * The private singleton parameterized constructor
+     *
+     * @param wsEndpoint - The SockJS client connection endpoint
+     * @param topicEndPoint - The subscriber topic endpoint
+     */
+    private StompMessageClient(String wsEndpoint, String topicEndPoint) {
 
-		List<Transport> transports = new ArrayList<>();
-		transports.add(new WebSocketTransport(new StandardWebSocketClient()));
-		SockJsClient sockJsClient = new SockJsClient(transports);
-		WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
-		stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+        System.setProperty("proxyHost", AppConstants.PROXY_HOST);
+        System.setProperty("proxyPort", AppConstants.PROXY_PORT);
 
-		String url = "ws://" + AppConstants.PROXY_HOST + ":" + AppConstants.PROXY_PORT + "/" + wsEndpoint;
+        List<Transport> transports = new ArrayList<>();
+        transports.add(new WebSocketTransport(new StandardWebSocketClient()));
+        SockJsClient sockJsClient = new SockJsClient(transports);
+        WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
+        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
-		StompSessionHandler handler = new StompSessionHandlerAdapter() {
-			@Override
-			public void afterConnected(final StompSession session, StompHeaders connectedHeaders) {
-				session.subscribe(AppConstants.TOPIC_ENDPOINT, new StompFrameHandler() {
-					@Override
-					public Type getPayloadType(StompHeaders headers) {
-						return ResponseMessage.class;
-					}
+        String url = "ws://" + AppConstants.PROXY_HOST + ":" + AppConstants.PROXY_PORT + "/" + wsEndpoint;
 
-					@Override
-					public void handleFrame(StompHeaders headers, Object payload) {
-						// ResponseMessage responseMessage = (ResponseMessage) payload;
-					}
-				});
+        StompSessionHandler handler = new StompSessionHandlerAdapter() {
+            @Override
+            public void afterConnected(final StompSession session, StompHeaders connectedHeaders) {
+                session.subscribe(AppConstants.TOPIC_ENDPOINT, new StompFrameHandler() {
+                    @Override
+                    public Type getPayloadType(StompHeaders headers) {
+                        return ResponseMessage.class;
+                    }
 
-				theSession = session;
-			}
-		};
+                    @Override
+                    public void handleFrame(StompHeaders headers, Object payload) {
+                        // ResponseMessage responseMessage = (ResponseMessage) payload;
+                    }
+                });
 
-		stompClient.connect(url, new WebSocketHttpHeaders(), handler, AppConstants.PROXY_PORT);
-	}
+                theSession = session;
+            }
+        };
 
-	/**
-	 * The user acces point to retrieving an instance of the StompMessageClient class
-	 * @param wsEndpoint
-	 *            - The SockJS client connection endpoint
-	 * @param topicEndPoint
-	 *            - The subscriber topic endpoint
-	 * @return StompMessageClient
-	 */
-	public static StompMessageClient getInstance(String wsEndpoint, String topicEndPoint) {
-		if(stompMessageClient == null){
-			stompMessageClient = new StompMessageClient(wsEndpoint, topicEndPoint);
-		}
-		
-		return stompMessageClient;
-	}
+        stompClient.connect(url, new WebSocketHttpHeaders(), handler, AppConstants.PROXY_PORT);
+    }
 
-	/**
-	 * The sendMessage client method for sending Stomp messages to the
-	 * topicEndPoint
-	 * 
-	 * @param message
-	 *            The plain text message (not yet JSON)
-	 */
-	public void sendMessage(String message) {
-		try {
-			theSession.send("/app" + AppConstants.APP_ENDPOINT, new AlertMessage(message));
-		} catch (Throwable t) {
-			LOGGER.error("sendMessage() " + t.toString());
-		}
-	}
+    /**
+     * The user acces point to retrieving an instance of the StompMessageClient
+     * class
+     *
+     * @param wsEndpoint - The SockJS client connection endpoint
+     * @param topicEndPoint - The subscriber topic endpoint
+     * @return StompMessageClient
+     */
+    public static StompMessageClient getInstance(String wsEndpoint, String topicEndPoint) {
+        if (stompMessageClient == null) {
+            stompMessageClient = new StompMessageClient(wsEndpoint, topicEndPoint);
+        }
+
+        return stompMessageClient;
+    }
+
+    /**
+     * The sendMessage client method for sending Stomp messages to the
+     * topicEndPoint
+     *
+     * @param message The plain text message (not yet JSON)
+     */
+    public void sendMessage(String message) {
+        try {
+            theSession.send("/app" + AppConstants.APP_ENDPOINT, new AlertMessage(message));
+        } catch (Throwable t) {
+            LOGGER.error("sendMessage() " + t.toString());
+        }
+    }
 }

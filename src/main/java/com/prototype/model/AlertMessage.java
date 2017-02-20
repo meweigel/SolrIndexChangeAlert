@@ -15,29 +15,29 @@ package com.prototype.model;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
- * 
+ *
  * @author mweigel
  *
- *         The Alert Message class
+ * The Alert Message class
  */
 public class AlertMessage {
-	private String alert;
 
-	public AlertMessage() {
+    private String alert;
 
-	}
+    public AlertMessage() {
 
-	public AlertMessage(String text) {
-		alert = text;
-	}
+    }
 
-	public String getAlert() {
-		return alert;
-	}
+    public AlertMessage(String text) {
+        alert = text;
+    }
 
-	public void setAlert(String alert) {
-		this.alert = alert;
-	}
+    public String getAlert() {
+        return alert;
+    }
+
+    public void setAlert(String alert) {
+        this.alert = alert;
+    }
 }

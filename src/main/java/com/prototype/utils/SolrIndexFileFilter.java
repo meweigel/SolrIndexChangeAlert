@@ -2,6 +2,7 @@ package com.prototype.utils;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Arrays;
 import java.util.HashSet;
 
 /*
@@ -19,43 +20,40 @@ import java.util.HashSet;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
- * 
+ *
  * @author mweigel
  *
- *         The IndexFileFilter class is used to filter file access to Solr
- *         indexes
+ * The IndexFileFilter class is used to filter file access to Solr indexes
  */
 public class SolrIndexFileFilter implements FileFilter {
-	private static final HashSet<String> hashSet;
 
-	static {
-		hashSet = new HashSet<String>();
-		for (String key : AppConstants.INDEX_FILE_EXTS) {
-			hashSet.add(key);
-		}
-	}
+    private static final HashSet<String> HASH_SET = new HashSet<>();
 
-	/**
-	 * The accept method - Accepts or rejects a file based on its extension
-	 */
-	@Override
-	public boolean accept(File file) {
+    static {
+        HASH_SET.addAll(Arrays.asList(AppConstants.INDEX_FILE_EXTS));
+    }
 
-		boolean result = false;
+    /**
+     * The accept method - Accepts or rejects a file based on its extension
+     * @param file The file being tested
+     */
+    @Override
+    public boolean accept(File file) {
 
-		if (file.isFile()) {
-			String name = file.getName();
-			int i = name.indexOf('.') + 1;
+        boolean result = false;
 
-			if (i > 0) {
-				result = hashSet.contains(name.substring(i));
-			}
-		}else if(file.isDirectory()){
-			result = true;
-		}
+        if (file.isFile()) {
+            String name = file.getName();
+            int i = name.indexOf('.') + 1;
 
-		return result;
-	}
+            if (i > 0) {
+                result = HASH_SET.contains(name.substring(i));
+            }
+        } else if (file.isDirectory()) {
+            result = true;
+        }
+
+        return result;
+    }
 }
