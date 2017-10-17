@@ -51,11 +51,16 @@ compiling. This constants file will be replaced later with a properties file.
 * INDEX_FOLDER = "/cots/solr-6.4.0/collection1/data/index";
 
 
+RUN Solr Index Change Alert
+---------------------------
+1) gradle bootRun
+
+2) start browser with 127.0.0.1:8080 (use your values for PROXY_HOST and PROXY_PORT)
+
 
 TODO:
 -----
-
-   Possible add a properties file to replace com.prototype.utils.AppConstants so that recompliling
+   Possibly add a properties file to replace com.prototype.utils.AppConstants so that recompliling
 will not be necessary.
 
 
