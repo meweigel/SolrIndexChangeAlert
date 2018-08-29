@@ -14,6 +14,15 @@ import com.prototype.client.StompMessageClient;
 import com.prototype.model.AlertMessage;
 import com.prototype.model.ResponseMessage;
 import com.prototype.utils.AppConstants;
+import static com.prototype.utils.Command.START_INDEX_MONITOR;
+import static com.prototype.utils.Command.STOP_INDEX_MONITOR;
+import static com.prototype.utils.Command.WATCH_DIR_CHANGE;
+import static com.prototype.utils.Command.WATCH_DIR_CREATE;
+import static com.prototype.utils.Command.WATCH_DIR_DELETE;
+import static com.prototype.utils.Command.WATCH_FILE_CHANGE;
+import static com.prototype.utils.Command.WATCH_FILE_CREATE;
+import static com.prototype.utils.Command.WATCH_FILE_DELETE;
+import com.prototype.utils.IndexChangeListenerImpl;
 import com.prototype.utils.IndexChangeMonitorUtil;
 
 /*
@@ -42,13 +51,16 @@ import com.prototype.utils.IndexChangeMonitorUtil;
 public class ResponseController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseController.class);
-
-    private boolean started = false;
+    private boolean started;
+    private long startTime;
     private FileAlterationMonitor monitorRef;
+    private IndexChangeListenerImpl indexChangeListenerImpl;
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat();
 
-    static {
+    public ResponseController() {
         DATE_FORMATTER.applyPattern(AppConstants.DATE_FORMAT);
+        started = false;
+        startTime = 0L;
     }
 
     /**
@@ -62,50 +74,76 @@ public class ResponseController {
     @MessageMapping(AppConstants.APP_ENDPOINT)
     @SendTo(AppConstants.TOPIC_ENDPOINT)
     public ResponseMessage onMessageReceived(AlertMessage message) throws Exception {
-
-        LOGGER.info("onMessageReceived() " + message.getAlert());
-
-        Date dateTime = new Date(System.currentTimeMillis());
-
-        String msg = message.getAlert();
-        boolean bool = msg.contains("true");
+        long elapsedTime;
+        long currentTime = System.currentTimeMillis();
+        String dateTimeString = DATE_FORMATTER.format(new Date(currentTime));
+        boolean state = message.getAlert().contains("true");
 
         // StompMessageClient will run as background thread when
         // onMessageReceived receives a "start" message.
-        if (!started && msg.equals(AppConstants.START_INDEX_MONITOR)) {
-            try {
-                StompMessageClient client = StompMessageClient.getInstance(AppConstants.WS_ENDPOINT,
-                        AppConstants.TOPIC_ENDPOINT);
-                monitorRef = IndexChangeMonitorUtil.monitorSolr(client);
-                message.setAlert(DATE_FORMATTER.format(dateTime) + " : The Solr index change montitor was started");
-                started = true;
-            } catch (Exception e) {
-                LOGGER.error("onMessageReceived() " + e.toString());
-            }
-        } else if (msg.equals(AppConstants.STOP_INDEX_MONITOR)) {
-            monitorRef.stop();
-            started = false;
-            message.setAlert(DATE_FORMATTER.format(dateTime) + " : The Solr index change montitor was stopped");
-        } else if (msg.contains(AppConstants.WATCH_DIR_CREATE)) {
-            IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchDirectoryCreate(bool);
-            message.setAlert(DATE_FORMATTER.format(dateTime) + " : Watching for directory creation: " + bool);
-        } else if (msg.contains(AppConstants.WATCH_DIR_CHANGE)) {
-            IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchDirectoryChange(bool);
-            message.setAlert(DATE_FORMATTER.format(dateTime) + " : Watching for directory change: " + bool);
-        } else if (msg.contains(AppConstants.WATCH_DIR_DELETE)) {
-            IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchDirectoryDelete(bool);
-            message.setAlert(DATE_FORMATTER.format(dateTime) + " : Watching for directory deletion: " + bool);
-        } else if (msg.contains(AppConstants.WATCH_FILE_CREATE)) {
-            IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchFileCreate(bool);
-            message.setAlert(DATE_FORMATTER.format(dateTime) + " : Watching for file creation: " + bool);
-        } else if (msg.contains(AppConstants.WATCH_FILE_CHANGE)) {
-            IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchFileChange(bool);
-            message.setAlert(DATE_FORMATTER.format(dateTime) + " : Watching for file change: " + bool);
-        } else if (msg.contains(AppConstants.WATCH_FILE_DELETE)) {
-            IndexChangeMonitorUtil.getIndexChangeListenerImpl().setWatchFileDelete(bool);
-            message.setAlert(DATE_FORMATTER.format(dateTime) + " : Watching for file deletion: " + bool);
-        } else {
-            message.setAlert(DATE_FORMATTER.format(dateTime) + " : " + message.getAlert());
+        switch (message.getCommand()) {
+            case START_INDEX_MONITOR:
+                if (!started) {
+                    try {
+                        String[] collection = message.getAlert().split(":", 3);
+                        if (collection.length == 3) {
+                            StompMessageClient client = StompMessageClient.getInstance(AppConstants.WS_ENDPOINT,
+                                    AppConstants.TOPIC_ENDPOINT);
+
+                            monitorRef = IndexChangeMonitorUtil.monitorSolr(client, collection[1], collection[2]);
+
+                            if (monitorRef != null) {
+                                message.setAlert(dateTimeString + "|The Solr index change montitor was started");
+                                started = true;
+                                indexChangeListenerImpl = IndexChangeMonitorUtil.getIndexChangeListenerImpl();
+                            } else {
+                                message.setAlert(dateTimeString + "|Invalid Collection or Shard was entered!");
+                            }
+                        } else {
+                            message.setAlert(dateTimeString + "| You must enter a Collection Name");
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("onMessageReceived() " + e.toString());
+                    }
+                }
+                break;
+            case STOP_INDEX_MONITOR:
+                monitorRef.stop();
+                started = false;
+                startTime = 0L;
+                message.setAlert(dateTimeString + "|The Solr index change montitor was stopped");
+                break;
+            case WATCH_DIR_CREATE:
+                indexChangeListenerImpl.setWatchDirectoryCreate(state);
+                message.setAlert(dateTimeString + "|Watching for directory creation: " + state);
+                break;
+            case WATCH_DIR_CHANGE:
+                indexChangeListenerImpl.setWatchDirectoryChange(state);
+                message.setAlert(dateTimeString + "|Watching for directory change: " + state);
+                break;
+            case WATCH_DIR_DELETE:
+                indexChangeListenerImpl.setWatchDirectoryDelete(state);
+                message.setAlert(dateTimeString + "|Watching for directory deletion: " + state);
+                break;
+            case WATCH_FILE_CREATE:
+                indexChangeListenerImpl.setWatchFileCreate(state);
+                message.setAlert(dateTimeString + "|Watching for file creation: " + state);
+                break;
+            case WATCH_FILE_CHANGE:
+                indexChangeListenerImpl.setWatchFileChange(state);
+                message.setAlert(dateTimeString + "|Watching for file change: " + state);
+                break;
+            case WATCH_FILE_DELETE:
+                indexChangeListenerImpl.setWatchFileDelete(state);
+                message.setAlert(dateTimeString + "|Watching for file deletion: " + state);
+                break;
+            default:
+                if (startTime == 0) {
+                    startTime = currentTime;
+                }
+                elapsedTime = ((currentTime - startTime) / 1000);
+                message.setAlert(dateTimeString + "|" + elapsedTime + "|" + message.getAlert());
+                break;
         }
 
         LOGGER.info("onMessageReceived() " + message.getAlert());

@@ -18,7 +18,7 @@ body {
 }
 
 #main-content {
-    max-width: 850px;
+    max-width: 1270px;
     padding: 2em 3em;
     margin: 0px auto 25px;
     background-color: #fff;
@@ -29,27 +29,125 @@ body {
 }
 
 h1#title {
-    margin: 10px 5px 30px;
+    margin: 10px 5px 20px;
     text-align: center;
 }
 
 fieldset#checkboxSet {
     padding: 5px;
     margin: 40px 40px 20px;
+    align-content: center;
 }
 
+legend{
+    text-align: center;
+}
 
-button#clear {
-    margin: 30px 0px 0px 45px;
+input#collection{
+    width: 150px;
+    min-width: 150px;
+} 
+
+input#shard{
+    width: 20px;
+    min-width: 20px;
+} 
+
+label{
+    font-size: 18px;
+}
+
+label#connectLabel{
+    padding: 30px 5px 5px 40px;
+    margin: 10px 5px 5px 45px;
+}
+
+label#collectionLabel{
+    padding: 5px 5px 5px 40px;
+    margin: 1px 5px 5px 45px;
+}
+
+label#shardLabel{
+    padding: 5px 5px 5px 15px;
+    margin: 1px 5px 5px 10px;
+}
+
+label#clearLabel{
+    padding: 30px 20px 5px 30px;
+    margin: 20px 20px 5px 20px;
 }
 
 table thead tr {
     display: block;
 }
 
-table th, table td {
-    width: 700px;
-    min-width: 700px;
+th#time{
+    min-width: 160px;
+}
+
+th#elapsedTime{
+    min-width: 100px;
+}
+
+th#message{
+    min-width: 360px;
+}
+
+th#type{
+    min-width: 100px;
+}
+
+th#size{
+    min-width: 100px;
+}
+
+th#delta{
+    min-width: 100px;
+}
+
+th#totalSize{
+    min-width: 120px;
+}
+
+th#typeTotal{
+    min-width: 120px;
+}
+
+
+td#time{
+    min-width: 160px;
+}
+
+td#elapsedTime{
+    min-width: 100px;
+}
+
+td#message{
+    min-width: 360px;
+}
+
+td#type{
+    min-width: 100px;
+}
+
+td#size{
+    min-width: 100px;
+}
+
+td#delta{
+    min-width: 100px;
+}
+
+td#totalSize{
+    min-width: 120px;
+}
+
+td#typeTotal{
+    min-width: 120px;
+}
+
+tr > td {
+    min-width: 240px;
 }
 
 table  tbody {
@@ -58,4 +156,19 @@ table  tbody {
     min-height: 600px;
     max-height: 600px;
     overflow: auto;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+
+@media (min-width: 1700px) {
+    .modal-xlg {
+        width: 100%;
+        max-width:1700px;
+        height: 50%; /* control height here */
+    }
 }

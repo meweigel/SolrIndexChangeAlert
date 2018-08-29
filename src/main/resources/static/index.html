@@ -19,11 +19,18 @@
 <html>
     <head>
         <title>Client WebSocket</title>
-        <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <link href="/main.css" rel="stylesheet">
-        <script src="/webjars/jquery/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <script src="/webjars/sockjs-client/sockjs.min.js"></script>
         <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+        <script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/14082/FileSaver.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+        <script src="/TableToJson.min.js"></script>
         <script src="/app.js"></script>
     </head>
     <body>
@@ -34,72 +41,100 @@
         </noscript>
         <div id="main-content" class="container-fluid">
             <h1 id="title">Solr Index Change Alert</h1>
-            <div class="row">
-                <div class="col-md-4"></div>
-                <div class="col-md-5">
+            <div class="row">           
+                <div class="col-md-3"></div>
+                <div class="col-md-9">
                     <form class="form-inline">
                         <div class="form-group">
-                            <label for="connect">WebSocket connection:</label> <br>
+                            <label  id="connectLabel" for="connect">WebSocket connection:</label>
                             <button id="connect" class="btn btn-default" type="submit">Connect</button>
                             <button id="disconnect" class="btn btn-default" type="submit"
                                     disabled="disabled">Disconnect</button>
+                            <br>
+                            <br>
+                            <label  id="collectionLabel" for="collection">Collection:</label>
+                            <input id="collection" type="text" name="Collection">
+                            <label  id="shardLabel" for="shard">Shard #:</label>
+                            <input id="shard" type="text" name="Shard" value="1">
+                            <br>
                         </div>
                     </form>
                 </div>
-                <div class="col-md-3"></div>
             </div>
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-3"></div>
+                <div class="col-md-9">
                     <form class="form-inline">
                         <div class="form-group">
                             <fieldset id="checkboxSet" data-role="controlgroup" disabled="disabled">
-                                <legend style="text-align: center;">Select File Event Types To Monitor</legend>
-                                <label class="checkbox-inline"> 
-                                    <input id="directoryCreate" type="checkbox">Create Dir
-                                </label> 
-                                <label class="checkbox-inline"> 
-                                    <input id="directoryChange" type="checkbox">Change Dir
-                                </label> 
-                                <label class="checkbox-inline"> 
-                                    <input id="directoryDelete" type="checkbox">Delete Dir
-                                </label> 
-                                &nbsp&nbsp&nbsp&nbsp
-                                <label class="checkbox-inline"> 
-                                    <input id="fileCreate" type="checkbox">Create File
-                                </label> 
-                                <label class="checkbox-inline"> 
-                                    <input id="fileChange" type="checkbox">Change File
-                                </label> 
-                                <label class="checkbox-inline"> 
-                                    <input id="fileDelete" type="checkbox">Delete File
-                                </label>
+                                <legend>Select File Event Types To Monitor</legend>                             
+                                <input id="directoryCreate" type="checkbox">Create Dir&nbsp;                                                  
+                                <input id="directoryChange" type="checkbox">Change Dir&nbsp;                                                   
+                                <input id="directoryDelete" type="checkbox">Delete Dir&nbsp;    
+                                <label>&nbsp;&nbsp;&nbsp;</label>
+                                <input id="indexCreate" type="checkbox">Create Index&nbsp;                          
+                                <input id="indexChange" type="checkbox">Change Index&nbsp;                                               
+                                <input id="indexDelete" type="checkbox">Delete Index&nbsp;
                             </fieldset>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-3">
-                    <button id="clear" class="btn btn-default" type="submit">Clear
-                        Table</button>
-                    <br>
+                <div class="col-md-3"></div>
+                <div class="col-md-8">    
+                    <button disabled id="clear" class="btn btn-default" type="submit">Clear Table</button>
+                    <label id="clearLabel" for="clear">Solr Index Change Alert Messages</label>
+                    <button disabled id="btn-save" class="btn btn-default" type="submit">Save as JSON</button>
+                    <button disabled id="btn-plot" class="btn btn-default" data-toggle="modal" data-target="#plotModal" type="submit">Plot JSON</button>
                 </div>
+                <div class="col-md-1"></div>
             </div>
             <div id="messageTable">
                 <div class="col-md-12">
                     <form>
-                        <table id="conversation"
-                               class="table table-striped table-condensed table-responsive">
+                        <table hidden id="resultsTable" class="table table-striped table-condensed table-responsive">
                             <thead>
                                 <tr>
-                                    <th style="text-align: center;">Solr Index Change Alert
-                                        Messages</th>
+                                    <th id="time">Date Time</th>
+                                    <th id="elapsedTime">Seconds</th>
+                                    <th id="message">Message</th>
+                                    <th id="type">Index Type</th>
+                                    <th id="size">Size (KB)</th>
+                                    <th id="delta">Delta (KB)</th>
+                                    <th id="totalSize">Total Size (KB)</th>
+                                    <th id="typeTotal">Type Total (KB)</th>
                                 </tr>
                             </thead>
                             <tbody id="indexChangeAlert">
                             </tbody>
                         </table>
                     </form>
+                </div>
+            </div>
+
+            <!-- The Modal -->
+            <div class="modal fade" id="plotModal">
+                <div class="modal-dialog modal-xlg">
+                    <div class=modal-content>
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h3 class="modal-title">Solr Index Change Alert</h4>
+                                <button type="button" class="close" data-dismiss="modal">×</button>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            <canvas id="solrLineChart" width="3000" height="2000"></canvas>
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>

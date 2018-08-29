@@ -1,5 +1,8 @@
 package com.prototype.model;
 
+import com.prototype.utils.Command;
+import java.io.Serializable;
+
 /*
  * Copyright 2014 the original author or authors.
  *
@@ -21,16 +24,32 @@ package com.prototype.model;
  *
  * The Alert Message class
  */
-public class AlertMessage {
+public class AlertMessage implements Serializable{
 
+    private Command command;
     private String alert;
 
     public AlertMessage() {
-
+        command = Command.RECEIVE_EVENT;
+        alert = " ";
     }
 
-    public AlertMessage(String text) {
-        alert = text;
+    public AlertMessage(String alert) {
+        this.alert = alert;
+        command = Command.RECEIVE_EVENT;
+    }
+
+    public AlertMessage(String alert, Command command) {
+        this.alert = alert;
+        this.command = command;
+    }
+
+    public Command getCommand() {
+        return command;
+    }
+
+    public void setCommand(Command command) {
+        this.command = command;
     }
 
     public String getAlert() {

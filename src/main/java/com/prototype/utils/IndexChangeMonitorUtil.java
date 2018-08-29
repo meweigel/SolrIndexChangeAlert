@@ -40,35 +40,44 @@ public class IndexChangeMonitorUtil {
      *
      * @param client StompMessageClient used for routing messages to a
      * subscribed endpoint
+     * @param collection Name of Collection
      * @return FileAlterationMonitor
      *
      * @throws Exception
      */
-    public static FileAlterationMonitor monitorSolr(StompMessageClient client) throws Exception {
-        File directory = new File(AppConstants.INDEX_FOLDER);
+    public static FileAlterationMonitor monitorSolr(StompMessageClient client, String collection, String shard) throws Exception {
+        String indexFolder = AppConstants.INDEX_FOLDER.replace("$", collection);
+        indexFolder = indexFolder.replace("#", shard);
+        File directory = new File(indexFolder);
+        FileAlterationMonitor monitor = null;
 
-        // Create an instance of a FileAlterationObserver that is given a
-        // SolrIndexFileFilter.
-        FileAlterationObserver observer = new FileAlterationObserver(directory, new SolrIndexFileFilter());
+        if (directory.exists() && directory.canRead()) {
 
-        // Add a IndexChangeListenerImpl that has a reference to an instance of
-        // a StompMessageClient. The listener is invoked when an index change
-        // event happens,
-        // and uses StompMessageClient to send a message to a Websocket topic
-        // endpoint.
-        indexChangeListenerImpl = new IndexChangeListenerImpl(client);
-        observer.addListener(indexChangeListenerImpl);
+            // Create an instance of a FileAlterationObserver that is given a
+            // SolrIndexFileFilter.
+            FileAlterationObserver observer = new FileAlterationObserver(directory, new SolrIndexFileFilter());
 
-        FileAlterationMonitor monitor = new FileAlterationMonitor(AppConstants.POLL_INTERVAL);
+            // Add a IndexChangeListenerImpl that has a reference to an instance of
+            // a StompMessageClient. The listener is invoked when an index change
+            // event happens,
+            // and uses StompMessageClient to send a message to a Websocket topic
+            // endpoint.
+            indexChangeListenerImpl = new IndexChangeListenerImpl(client);
+            observer.addListener(indexChangeListenerImpl);
 
-        // The FileAlterationObserver will observe file alterations and then
-        // invoke the IndexChangeListenerImpl
-        monitor.addObserver(observer);
+            monitor = new FileAlterationMonitor(AppConstants.POLL_INTERVAL);
 
-        // Start the FileAlterationMonitor thread
-        monitor.start();
+            // The FileAlterationObserver will observe file alterations and then
+            // invoke the IndexChangeListenerImpl
+            monitor.addObserver(observer);
 
-        LOGGER.info("monitorSolr() The FileAlterationMonitor thread was started");
+            // Start the FileAlterationMonitor thread
+            monitor.start();
+
+            LOGGER.info("monitorSolr() The FileAlterationMonitor thread was started");
+        } else {
+            LOGGER.error("monitorSolr() Invalid directory: " + directory.getAbsolutePath());
+        }
 
         return monitor;
     }
