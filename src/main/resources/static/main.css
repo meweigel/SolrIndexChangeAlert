@@ -35,12 +35,31 @@ h1#title {
 
 fieldset#checkboxSet {
     padding: 5px;
-    margin: 40px 40px 20px;
+    margin: 40px 10px 5px 10px;
     align-content: center;
+}
+
+button#btn-plot{
+    padding: 5px 5px 5px 5px;
+    margin: 5px 5px 5px 50px;
+}
+
+fieldset#tableboxSet{
+    padding: 5px 1px 1px 1px;
+    margin: 5px 1px 15px 1px;
 }
 
 legend{
     text-align: center;
+}
+
+input.checkbox{
+    padding: 1px 5px 5px 5px;
+    margin: 1px 5px 5px 5px;
+    width: 18px;
+    min-width: 18px;
+    height: 18px;
+    min-height: 18px;
 }
 
 input#collection{
@@ -73,8 +92,8 @@ label#shardLabel{
 }
 
 label#clearLabel{
-    padding: 30px 20px 5px 30px;
-    margin: 20px 20px 5px 20px;
+    padding: 30px 10px 5px 10px;
+    margin: 20px 10px 5px 10px;
 }
 
 table thead tr {

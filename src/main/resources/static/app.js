@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-
 var stompClient = null;
 var messageCount = 0;
+var plotsSize = false;
+var plotDelta = false;
+var plotTypeTotal = false;
+var chart = null;
 
 var Command = {
     START_INDEX_MONITOR: 0,
@@ -35,12 +38,21 @@ function AlertMessage(alert, command) {
     this.command = command;
 }
 
-function DataSet(data, label, borderColor, fill) {
-    this.data = data;
+function DataSet(label, data, showLine, fill, borderColor) {
     this.label = label;
-    this.borderColor = borderColor;
+    this.data = data;
+    this.showLine = showLine;
     this.fill = fill;
+    this.borderColor = borderColor;
 }
+
+function DataPoint(x, y) {
+    this.x = x;
+    this.y = y;
+}
+
+var IndexTypes = ["cfe", "cfs", "doc", "dvd", "dvm", "fdt", "fdx", "fnm", "lock", "nvd", "nvm",
+    "pos", "si", "tim", "tip"];
 
 var DataTypeHash = {};
 
@@ -121,10 +133,20 @@ DataTypeHash["tip"].yTypeTotalData = [];
 DataTypeHash["tip"].index = 0;
 
 
+function flushData() {
+    for (var i = 0; i < IndexTypes.length; i++) {
+        DataTypeHash[IndexTypes[i]].index = 0;
+        DataTypeHash[IndexTypes[i]].yTypeTotalData = [];
+        DataTypeHash[IndexTypes[i]].yDeltaData = [];
+        DataTypeHash[IndexTypes[i]].ySizeData = [];
+    }
+}
+
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
     $("#disconnect").prop("disabled", !connected);
     $("#checkboxSet").prop("disabled", !connected);
+    $("#tableboxSet").prop("disabled", !connected);
 
     if (connected) {
         $("#resultsTable").show();
@@ -203,21 +225,30 @@ function getRandomColor() {
 }
 
 
-function plot(xLabelData, dataSet) {
+function plot(dataSet) {
 
-    new Chart(document.getElementById("solrLineChart"), {
-        type: 'line',
+    var ctx = document.getElementById("solrLineChart");
+
+    chart = new Chart(ctx, {
+        type: 'scatter',
         data: {
-            labels: xLabelData,
             datasets: dataSet
         },
         options: {
-            responsive: true,
+//            responsive: true,
             title: {
                 display: true,
                 fontSize: 14,
                 text: 'Size (KB) of Solr Index Types Vs. Elapsed Time (sec)'
             },
+//            tooltips: {
+//                mode: 'index',
+//                intersect: false,
+//            },
+//            hover: {
+//                mode: 'nearest',
+//                intersect: true
+//            },
             scales: {
                 xAxes: [{
                         display: true,
@@ -230,6 +261,7 @@ function plot(xLabelData, dataSet) {
                             offsetGridLines: true
                         },
                         ticks: {
+                            stepSize: 5.0,
                             major: {
                                 fontStyle: 'bold',
                                 fontColor: '#FF0000'
@@ -239,6 +271,9 @@ function plot(xLabelData, dataSet) {
                 yAxes: [{
                         display: true,
                         type: 'logarithmic',
+                        ticks: {
+                            beginAtZero: true
+                        },
                         scaleLabel: {
                             display: true,
                             labelString: 'Size (KB)'
@@ -248,7 +283,6 @@ function plot(xLabelData, dataSet) {
         }
     });
 }
-
 
 function disconnect() {
     if (stompClient != null) {
@@ -332,6 +366,9 @@ $(function () {
         $("#indexCreate").prop("checked", false);
         $("#indexChange").prop("checked", false);
         $("#indexDelete").prop("checked", false);
+        $("#size").prop("checked", false);
+        $("#delta").prop("checked", false);
+        $("#typeTotal").prop("checked", false);
         var alertMessage = new AlertMessage("|Disconnect Index Monitoring", Command.STOP_INDEX_MONITOR);
         sendMessage(alertMessage);
         setTimeout(function () {
@@ -399,6 +436,30 @@ $(function () {
         }
     });
 
+    $('input#size').change(function () {
+        if ($('input[id=size]').is(':checked')) {
+            plotsSize = true;
+        } else {
+            plotsSize = false;
+        }
+    });
+    $('input#delta').change(function () {
+        if ($('input[id=delta]').is(':checked')) {
+            plotDelta = true;
+        } else {
+            plotDelta = false;
+        }
+    });
+
+    $('input#typeTotal').change(function () {
+        if ($('input[id=typeTotal]').is(':checked')) {
+            plotTypeTotal = true;
+        } else {
+            plotTypeTotal = false;
+        }
+    });
+
+
     $("#clear").click(function () {
         clearTable();
     });
@@ -411,31 +472,43 @@ $(function () {
         saveAs(blob, filename + ".json");
     });
 
+    // Plot Data
     $("#btn-plot").click(function () {
+
+        flushData();
+
+        if (chart !== null) {
+            chart.destroy();
+        }
 
         var jsonObject = makeJsonFromTable("resultsTable");
 
         if (jsonObject !== null && jsonObject !== undefined) {
             if (jsonObject.count > 0) {
                 var key;
-                var xSecondsData = [];
-                var yTotalSize = [];
+                var totalSize = [];
                 var dataSets = [];
                 var indexTypes = [];
                 var j = 0;
 
-                // Collect the data and congregate per index type
+                // Collect the data and agregate per index type
                 for (var i = 0; i < jsonObject.count; i++) {
-                    //xDateTime[i] = jsonObject.value[i].DateTime;
-                    xSecondsData[i] = jsonObject.value[i].Seconds;
-                    //DataTypeHash[indexType].Message[i] = jsonObject.value[i].Message;
-                    yTotalSize[i] = jsonObject.value[i].TotalSize;
+                    //jsonObject.value[i].DateTime;
+                    //jsonObject.value[i].Message;
+
+                    totalSize[i] = new DataPoint(jsonObject.value[i].Seconds, jsonObject.value[i].TotalSize);
 
                     key = jsonObject.value[i].IndexType;
                     j = DataTypeHash[key].index;
-                    DataTypeHash[key].ySizeData[j] = jsonObject.value[i].Size;
-                    DataTypeHash[key].yDeltaData[j] = jsonObject.value[i].Delta;
-                    DataTypeHash[key].yTypeTotalData[j] = jsonObject.value[i].TypeTotal;
+                    if (plotsSize) {
+                        DataTypeHash[key].ySizeData[j] = new DataPoint(jsonObject.value[i].Seconds, jsonObject.value[i].Size);
+                    }
+                    if (plotDelta) {
+                        DataTypeHash[key].yDeltaData[j] = new DataPoint(jsonObject.value[i].Seconds, jsonObject.value[i].Delta);
+                    }
+                    if (plotTypeTotal) {
+                        DataTypeHash[key].yTypeTotalData[j] = new DataPoint(jsonObject.value[i].Seconds, jsonObject.value[i].TypeTotal);
+                    }
                     DataTypeHash[key].index++;
 
                     if (!indexTypes.includes(key)) {
@@ -447,22 +520,28 @@ $(function () {
                 var label;
                 var type;
                 for (j = 0; j < indexTypes.length; j++) {
+
                     type = indexTypes[j];
-                    if (DataTypeHash[type].index !== null && DataTypeHash[type].index !== undefined) {
-                        if (DataTypeHash[type].index > 0) {
+
+                    if (DataTypeHash[type].index > 0) {
+                        if (plotsSize) {
                             label = "Size:" + type;
-                            dataSets.push(new DataSet(DataTypeHash[type].ySizeData, label, getRandomColor(), false));
+                            dataSets.push(new DataSet(label, DataTypeHash[type].ySizeData, true, false, getRandomColor()));
+                        }
+                        if (plotDelta) {
                             label = "DeltaSize:" + type;
-                            dataSets.push(new DataSet(DataTypeHash[type].yDeltaData, label, getRandomColor(), false));
+                            dataSets.push(new DataSet(label, DataTypeHash[type].yDeltaData, true, false, getRandomColor()));
+                        }
+                        if (plotTypeTotal) {
                             label = "TypeTotal:" + type;
-                            dataSets.push(new DataSet(DataTypeHash[type].yTypeTotalData, label, getRandomColor(), false));
+                            dataSets.push(new DataSet(label, DataTypeHash[type].yTypeTotalData, true, false, getRandomColor()));
                         }
                     }
                 }
 
-                dataSets[dataSets.length] = new DataSet(yTotalSize, "Total Size", getRandomColor(), false);
+                dataSets.push(new DataSet("Total Size", totalSize, true, false, getRandomColor()));
 
-                plot(xSecondsData, dataSets);
+                plot(dataSets);
             }
         }
     });

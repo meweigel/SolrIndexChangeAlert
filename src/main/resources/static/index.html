@@ -68,27 +68,35 @@
                         <div class="form-group">
                             <fieldset id="checkboxSet" data-role="controlgroup" disabled="disabled">
                                 <legend>Select File Event Types To Monitor</legend>                             
-                                <input id="directoryCreate" type="checkbox">Create Dir&nbsp;                                                  
-                                <input id="directoryChange" type="checkbox">Change Dir&nbsp;                                                   
-                                <input id="directoryDelete" type="checkbox">Delete Dir&nbsp;    
-                                <label>&nbsp;&nbsp;&nbsp;</label>
-                                <input id="indexCreate" type="checkbox">Create Index&nbsp;                          
-                                <input id="indexChange" type="checkbox">Change Index&nbsp;                                               
-                                <input id="indexDelete" type="checkbox">Delete Index&nbsp;
+                                <input class="checkbox" id="directoryCreate" type="checkbox">Create Dir                                            
+                                <input class="checkbox" id="directoryChange" type="checkbox">Change Dir                                                   
+                                <input class="checkbox" id="directoryDelete" type="checkbox">Delete Dir    
+                                <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                                <input class="checkbox" id="indexCreate" type="checkbox">Create Index                          
+                                <input class="checkbox" id="indexChange" type="checkbox">Change Index                                               
+                                <input class="checkbox" id="indexDelete" type="checkbox">Delete Index
                             </fieldset>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-3"></div>
-                <div class="col-md-8">    
-                    <button disabled id="clear" class="btn btn-default" type="submit">Clear Table</button>
-                    <label id="clearLabel" for="clear">Solr Index Change Alert Messages</label>
-                    <button disabled id="btn-save" class="btn btn-default" type="submit">Save as JSON</button>
-                    <button disabled id="btn-plot" class="btn btn-default" data-toggle="modal" data-target="#plotModal" type="submit">Plot JSON</button>
+                <div class="col-md-2"></div>
+                <div class="col-md-10">    
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <fieldset id="tableboxSet" data-role="controlgroup" disabled="disabled">
+                                <button disabled id="clear" class="btn btn-default" type="submit">Clear Table</button>
+                                <label id="clearLabel" for="clear">Solr Index Change Alert Messages</label>
+                                <button disabled id="btn-save" class="btn btn-default" type="submit">Save as JSON</button>
+                                <button disabled id="btn-plot" class="btn btn-default" data-toggle="modal" data-target="#plotModal" type="submit">Plot JSON</button> 
+                                <input class="checkbox" id="size" type="checkbox">Size                        
+                                <input class="checkbox" id="delta" type="checkbox">Delta                                              
+                                <input class="checkbox" id="typeTotal" type="checkbox">Type Total
+                            </fieldset>
+                        </div>
+                    </form> 
                 </div>
-                <div class="col-md-1"></div>
             </div>
             <div id="messageTable">
                 <div class="col-md-12">
@@ -103,7 +111,7 @@
                                     <th id="size">Size (KB)</th>
                                     <th id="delta">Delta (KB)</th>
                                     <th id="totalSize">Total Size (KB)</th>
-                                    <th id="typeTotal">Type Total (KB)</th>
+                                    <th id="typeTotal">Index Total (KB)</th>
                                 </tr>
                             </thead>
                             <tbody id="indexChangeAlert">
