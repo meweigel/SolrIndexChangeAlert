@@ -21,12 +21,12 @@ Activity
    When the Solr Index Change Alert Web application war file is deployed in Apache Tomcat,
 the user can view the front end application running at http://hostName:portNum. They
 will be able to connect to the service via a WebSocket. They then can start the Solr Index
-Change Montitor background thread. This thread is running a FileAlterationMonitor that
+Change Monitor background thread. This thread is running a FileAlterationMonitor that
 has a reference to a FileAlterationObserver. The FileAlterationObserver will observe file
 alterations and then invoke a registered IndexChangeListenerImpl event listener. The
 IndexChangeListenerImpl has a reference to an instance of a StompMessageClient that it
 uses to send AlertMessages to the  Websocket application endpoint /app/alertMessage. The
-incoming AlertMessages are then received by the contoller of the Solr Index Change Alert
+incoming AlertMessages are then received by the controller of the Solr Index Change Alert
 service and are processed by its onMessageReceived method, which then routes ResponseMessages
 to the subscribed topic endpoint /topic/responseMessage which the web browser client is
 subscribed to. The messages will then be displayed in a table for review.
