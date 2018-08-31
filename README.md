@@ -1,5 +1,5 @@
 
-Solr Index Change Alert Version 1.0 
+Solr Index Change Alert Version 1.5 
 ===================================
 
 
@@ -37,31 +37,44 @@ browser, so the client is updated in real time and the user knows instantly when
 added/removed/changed without having to refresh the page or do some kind of polling.
 
 
+PROPERTIES FILE - IMPORTANT BEFORE RUNNING
+------------------------------------------
 
-IMPORTANT BEFORE COMPILING
---------------------------
+   The config properties file (SolrIndexChangeAlert/conf/config.properties) contains the 
+PROXY_HOST, the PROXY_PORT and the INDEX_FOLDER_ROOT constants that should be changed 
+before running. The constant INDEX_FOLDER_ROOT is the actual root path to your Solr core 
+index files directory which is typically COLLECTION_shard#_replica1/data/index. The COLLECTION 
+and shard # are specified in the UI. 
 
-   The file com.prototype.utils.AppConstants contains the PROXY_HOST and the PROXY_PORT
-constants that have to be changed before compiling. You must also change the constant
-INDEX_FOLDER and add the actual full path to your Solr core index files directory before
-compiling. This constants file will be replaced later with a properties file.
-
-* PROXY_HOST = "127.0.0.1";
-* PROXY_PORT = "8080";
-* INDEX_FOLDER = "/cots/solr-6.4.0/collection1/data/index";
-
-
-RUN Solr Index Change Alert
----------------------------
-1) gradle bootRun
-
-2) start browser with 127.0.0.1:8080 (use your values for PROXY_HOST and PROXY_PORT)
+Config File Examples:
+* INDEX_FOLDER_ROOT=/opt/lucidworks/fusion/3.1.5/data/solr/
+* PROXY_HOST=127.0.0.1
+* PROXY_PORT=8080
 
 
-TODO:
------
-   Possibly add a properties file to replace com.prototype.utils.AppConstants so that recompliling
-will not be necessary.
+To Build and Run Solr Index Change Alert
+----------------------------------------
+1) gradle clean build
+
+2) gradle bootRun
+
+3) start browser with 127.0.0.1:8080 (use your values for PROXY_HOST and PROXY_PORT)
+
+
+RECENT UPGRADE CHANGES 8-31-18
+------------------------------
+1) Added a properties file so that recompliling will not be necessary.
+
+2) Added multiple column data output instead of just the date time, message.
+
+3) Added export/save of table data to a JSON file.
+
+4) Added chart.js plotting of the table data.
+
+5) Added a HTML5 Web Worker for the construction of chart.js data sets.
+
+6) The HTML5 Web Worker utilizes Transferrable objects for speed.
+
 
 
 
