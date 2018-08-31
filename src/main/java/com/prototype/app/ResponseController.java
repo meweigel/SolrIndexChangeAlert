@@ -100,7 +100,7 @@ public class ResponseController {
                                 message.setAlert(dateTimeString + "|Invalid Collection or Shard was entered!");
                             }
                         } else {
-                            message.setAlert(dateTimeString + "| You must enter a Collection Name");
+                            message.setAlert(dateTimeString + "|You must enter a Collection Name");
                         }
                     } catch (Exception e) {
                         LOGGER.error("onMessageReceived() " + e.toString());

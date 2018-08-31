@@ -85,11 +85,11 @@
                 <div class="col-md-10">    
                     <form class="form-inline">
                         <div class="form-group">
-                            <fieldset id="tableboxSet" data-role="controlgroup" disabled="disabled">
-                                <button disabled id="clear" class="btn btn-default" type="submit">Clear Table</button>
+                            <fieldset hidden id="tableboxSet" data-role="controlgroup">
+                                <button id="clear" class="btn btn-default" type="submit">Clear Table</button>
                                 <label id="clearLabel" for="clear">Solr Index Change Alert Messages</label>
-                                <button disabled id="btn-save" class="btn btn-default" type="submit">Save as JSON</button>
-                                <button disabled id="btn-plot" class="btn btn-default" data-toggle="modal" data-target="#plotModal" type="submit">Plot JSON</button> 
+                                <button id="btn-save" class="btn btn-default" type="submit">Save as JSON</button>
+                                <button id="btn-plot" class="btn btn-default" data-toggle="modal" data-target="#plotModal" type="submit">Plot JSON</button> 
                                 <input class="checkbox" id="size" type="checkbox">Size                        
                                 <input class="checkbox" id="delta" type="checkbox">Delta                                              
                                 <input class="checkbox" id="typeTotal" type="checkbox">Type Total
@@ -111,7 +111,7 @@
                                     <th id="size">Size (KB)</th>
                                     <th id="delta">Delta (KB)</th>
                                     <th id="totalSize">Total Size (KB)</th>
-                                    <th id="typeTotal">Index Total (KB)</th>
+                                    <th id="typeTotal">Type Total (KB)</th>
                                 </tr>
                             </thead>
                             <tbody id="indexChangeAlert">
@@ -128,8 +128,8 @@
 
                         <!-- Modal Header -->
                         <div class="modal-header">
-                            <h3 class="modal-title">Solr Index Change Alert</h4>
-                                <button type="button" class="close" data-dismiss="modal">×</button>
+                            <h3 class="modal-title">Solr Index Change Alert</h3>
+                            <button type="button" class="close" data-dismiss="modal">×</button>
                         </div>
 
                         <!-- Modal body -->
@@ -139,7 +139,7 @@
 
                         <!-- Modal footer -->
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button class="close" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         </div>
 
                     </div>

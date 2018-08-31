@@ -15,11 +15,16 @@
  */
 
 var stompClient = null;
+var chart = null;
+var workerThread = undefined;
 var messageCount = 0;
+var count = 0;
 var plotsSize = false;
 var plotDelta = false;
 var plotTypeTotal = false;
-var chart = null;
+var tableRows = new String("");
+var dataFeedFlag = false;
+
 
 var Command = {
     START_INDEX_MONITOR: 0,
@@ -38,122 +43,25 @@ function AlertMessage(alert, command) {
     this.command = command;
 }
 
-function DataSet(label, data, showLine, fill, borderColor) {
-    this.label = label;
-    this.data = data;
-    this.showLine = showLine;
-    this.fill = fill;
-    this.borderColor = borderColor;
-}
-
-function DataPoint(x, y) {
-    this.x = x;
-    this.y = y;
-}
-
-var IndexTypes = ["cfe", "cfs", "doc", "dvd", "dvm", "fdt", "fdx", "fnm", "lock", "nvd", "nvm",
-    "pos", "si", "tim", "tip"];
-
-var DataTypeHash = {};
-
-DataTypeHash["cfe"] = {};
-DataTypeHash["cfe"].ySizeData = [];
-DataTypeHash["cfe"].yDeltaData = [];
-DataTypeHash["cfe"].yTypeTotalData = [];
-DataTypeHash["cfe"].index = 0;
-DataTypeHash["cfs"] = {};
-DataTypeHash["cfs"].ySizeData = [];
-DataTypeHash["cfs"].yDeltaData = [];
-DataTypeHash["cfs"].yTypeTotalData = [];
-DataTypeHash["cfs"].index = 0;
-DataTypeHash["doc"] = {};
-DataTypeHash["doc"].ySizeData = [];
-DataTypeHash["doc"].yDeltaData = [];
-DataTypeHash["doc"].yTypeTotalData = [];
-DataTypeHash["doc"].index = 0;
-DataTypeHash["dvd"] = {};
-DataTypeHash["dvd"].ySizeData = [];
-DataTypeHash["dvd"].yDeltaData = [];
-DataTypeHash["dvd"].yTypeTotalData = [];
-DataTypeHash["dvd"].index = 0;
-DataTypeHash["dvm"] = {};
-DataTypeHash["dvm"].ySizeData = [];
-DataTypeHash["dvm"].yDeltaData = [];
-DataTypeHash["dvm"].yTypeTotalData = [];
-DataTypeHash["dvm"].index = 0;
-DataTypeHash["fdt"] = {};
-DataTypeHash["fdt"].ySizeData = [];
-DataTypeHash["fdt"].yDeltaData = [];
-DataTypeHash["fdt"].yTypeTotalData = [];
-DataTypeHash["fdt"].index = 0;
-DataTypeHash["fdx"] = {};
-DataTypeHash["fdx"].ySizeData = [];
-DataTypeHash["fdx"].yDeltaData = [];
-DataTypeHash["fdx"].yTypeTotalData = [];
-DataTypeHash["fdx"].index = 0;
-DataTypeHash["fnm"] = {};
-DataTypeHash["fnm"].ySizeData = [];
-DataTypeHash["fnm"].yDeltaData = [];
-DataTypeHash["fnm"].yTypeTotalData = [];
-DataTypeHash["fnm"].index = 0;
-DataTypeHash["lock"] = {};
-DataTypeHash["lock"].ySizeData = [];
-DataTypeHash["lock"].yDeltaData = [];
-DataTypeHash["lock"].yTypeTotalData = [];
-DataTypeHash["lock"].index = 0;
-DataTypeHash["nvd"] = {};
-DataTypeHash["nvd"].ySizeData = [];
-DataTypeHash["nvd"].yDeltaData = [];
-DataTypeHash["nvd"].yTypeTotalData = [];
-DataTypeHash["nvd"].index = 0;
-DataTypeHash["nvm"] = {};
-DataTypeHash["nvm"].ySizeData = [];
-DataTypeHash["nvm"].yDeltaData = [];
-DataTypeHash["nvm"].yTypeTotalData = [];
-DataTypeHash["nvm"].index = 0;
-DataTypeHash["pos"] = {};
-DataTypeHash["pos"].ySizeData = [];
-DataTypeHash["pos"].yDeltaData = [];
-DataTypeHash["pos"].yTypeTotalData = [];
-DataTypeHash["pos"].index = 0;
-DataTypeHash["si"] = {};
-DataTypeHash["si"].ySizeData = [];
-DataTypeHash["si"].yDeltaData = [];
-DataTypeHash["si"].yTypeTotalData = [];
-DataTypeHash["si"].index = 0;
-DataTypeHash["tim"] = {};
-DataTypeHash["tim"].ySizeData = [];
-DataTypeHash["tim"].yDeltaData = [];
-DataTypeHash["tim"].yTypeTotalData = [];
-DataTypeHash["tim"].index = 0;
-DataTypeHash["tip"] = {};
-DataTypeHash["tip"].ySizeData = [];
-DataTypeHash["tip"].yDeltaData = [];
-DataTypeHash["tip"].yTypeTotalData = [];
-DataTypeHash["tip"].index = 0;
-
-
-function flushData() {
-    for (var i = 0; i < IndexTypes.length; i++) {
-        DataTypeHash[IndexTypes[i]].index = 0;
-        DataTypeHash[IndexTypes[i]].yTypeTotalData = [];
-        DataTypeHash[IndexTypes[i]].yDeltaData = [];
-        DataTypeHash[IndexTypes[i]].ySizeData = [];
-    }
-}
-
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
     $("#disconnect").prop("disabled", !connected);
     $("#checkboxSet").prop("disabled", !connected);
-    $("#tableboxSet").prop("disabled", !connected);
 
     if (connected) {
+        $("#tableboxSet").show();
+        $("#clear").show();
+        $("#btn-save").show();
+        $("#btn-plot").show();
         $("#resultsTable").show();
     } else {
+        $("#tableboxSet").hide();
+        $("#clear").hide();
+        $("#btn-save").hide();
+        $("#btn-plot").hide();
         $("#resultsTable").hide();
     }
-    $("#indexChangeAlert").html("");
+    clearTable();
 }
 
 function connect() {
@@ -166,10 +74,8 @@ function connect() {
             showMessageAlert(JSON.parse(response.body).content);
         });
 
-
-        stompClient.send("/topic/responseMessage", {}, JSON.stringify({
-            'content': getDateTime() + '|WebSocket connection successfully made '
-        }));
+        stompClient.send("/topic/responseMessage", {},
+                JSON.stringify({'content': getDateTime() + "|WebSocket connection successfully made"}));
     });
 }
 
@@ -206,22 +112,115 @@ function getDateTime() {
     return dateTime;
 }
 
-function getRndInteger(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+function showMessageAlert(message) {
+    var text = message.split("|");
+    if (text.length == 2) {
+        $("#indexChangeAlert").append("<tr><td id='time'>" +
+                text[0] +
+                "</td><td id='elapsedTime'>N/A</td><td id='message'>" +
+                text[1] +
+                "</td><td id='type'>N/A</td><td id='size'>N/A</td><td id='delta'>N/A</td>" +
+                "<td id='totalSize'>N/A</td><td id='typeTotal'>N/A</td></tr>");
+        dataFeedFlag = true;
+    } else if (text.length == 8) {
+        if (dataFeedFlag) {
+            clearTable();
+            dataFeedFlag = false;
+        }
+        
+        messageCount++;
+        count++;
+
+        tableRows = tableRows.concat("<tr><td id='time'>" +
+                text[0] +
+                "</td><td id='elapsedTime'>" +
+                text[1] +
+                "</td><td id='message'>" +
+                text[2] +
+                "</td><td id='type'>" +
+                text[3] +
+                "</td><td id='size'>" +
+                text[4] +
+                "</td><td id='delta'>" +
+                text[5] +
+                "</td><td id='totalSize'>" +
+                text[6] +
+                "</td><td id='typeTotal'>" +
+                text[7] +
+                "</td></tr>");
+
+        if (count == 50) {
+            appendTableRows();
+        } else {
+            timer();
+        }
+    }
+
+    //$("#indexChangeAlert").scroll();
+    $("#indexChangeAlert").scrollTop(messageCount * 100);
 }
 
-function RGBToHex(r, g, b) {
-    var bin = r << 16 | g << 8 | b;
-    return (function (h) {
-        return new Array(7 - h.length).join("0") + h
-    })(bin.toString(16).toUpperCase())
+function appendTableRows() {
+    if (tableRows.length > 0) {
+        $("#indexChangeAlert").append(tableRows);
+        count = 0;
+        tableRows = new String("");
+    }
 }
 
-function getRandomColor() {
-    var red = getRndInteger(0, 255);
-    var green = getRndInteger(0, 255);
-    var blue = getRndInteger(0, 255);
-    return ("#" + RGBToHex(red, green, blue));
+// Look for remaining row data
+function timer() {
+    var countMoment = count;
+    setTimeout(function () {
+        if (countMoment == count) {
+            appendTableRows();
+        }
+    }, 3000);
+}
+
+function clearTable() {
+    $("#resultsTable > tbody").empty();
+}
+
+function disconnect() {
+    if (stompClient != null) {
+        stompClient.disconnect();
+    }
+    setConnected(false);
+    console.log("Disconnected");
+}
+
+function sendMessage(selectValue) {
+    stompClient.send("/app/alertMessage", {}, JSON.stringify(selectValue));
+}
+
+function callWorker(javaScript, data) {
+
+    if (typeof (Worker) !== "undefined") {
+
+        if (typeof (workerThread) == "undefined") {
+            workerThread = new Worker(javaScript);
+        }
+
+        workerThread.onmessage = function (event) {
+            plot(event.data);
+        };
+
+        workerThread.onerror = function (e) {
+            alert('Error: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);
+        };
+
+        //start the worker - Using Transferrable objects
+        var ab = new ArrayBuffer(data);
+        workerThread.postMessage(data, [ab]);
+    } else {
+        document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
+    }
+}
+
+function stopWorker() {
+    workerThread.terminate();
+    workerThread = undefined;
 }
 
 
@@ -235,20 +234,20 @@ function plot(dataSet) {
             datasets: dataSet
         },
         options: {
-//            responsive: true,
+            //            responsive: true,
             title: {
                 display: true,
-                fontSize: 14,
+                fontSize: 20,
                 text: 'Size (KB) of Solr Index Types Vs. Elapsed Time (sec)'
             },
-//            tooltips: {
-//                mode: 'index',
-//                intersect: false,
-//            },
-//            hover: {
-//                mode: 'nearest',
-//                intersect: true
-//            },
+            //            tooltips: {
+            //                mode: 'index',
+            //                intersect: false,
+            //            },
+            //            hover: {
+            //                mode: 'nearest',
+            //                intersect: true
+            //            },
             scales: {
                 xAxes: [{
                         display: true,
@@ -284,60 +283,7 @@ function plot(dataSet) {
     });
 }
 
-function disconnect() {
-    if (stompClient != null) {
-        stompClient.disconnect();
-    }
-    setConnected(false);
-    console.log("Disconnected");
-    document.getElementById("clear").disabled = true;
-    document.getElementById("btn-save").disabled = true;
-    document.getElementById("btn-plot").disabled = true;
-}
 
-function sendMessage(selectValue) {
-    stompClient.send("/app/alertMessage", {}, JSON.stringify(selectValue));
-}
-
-function clearTable() {
-    $("#resultsTable > tbody").empty();
-}
-
-function showMessageAlert(message) {
-    var text = message.split("|");
-    if (text.length == 2) {
-        $("#indexChangeAlert").append("<tr><td id='time'>" +
-                text[0] +
-                "</td><td id='elapsedTime'>N/A</td><td id='message'>" +
-                text[1] +
-                "</td><td id='type'>N/A</td><td id='size'>N/A</td><td id='delta'>N/A</td>" +
-                "<td id='totalSize'>N/A</td><td id='typeTotal'>N/A</td></tr>");
-        document.getElementById("clear").disabled = false;
-        document.getElementById("btn-save").disabled = false;
-        document.getElementById("btn-plot").disabled = false;
-    } else if (text.length == 8) {
-        $("#indexChangeAlert").append("<tr><td id='time'>" +
-                text[0] +
-                "</td><td id='elapsedTime'>" +
-                text[1] +
-                "</td><td id='message'>" +
-                text[2] +
-                "</td><td id='type'>" +
-                text[3] +
-                "</td><td id='size'>" +
-                text[4] +
-                "</td><td id='delta'>" +
-                text[5] +
-                "</td><td id='totalSize'>" +
-                text[6] +
-                "</td><td id='typeTotal'>" +
-                text[7] +
-                "</td></tr>");
-    }
-    messageCount++;
-    //$("#indexChangeAlert").scroll();
-    $("#indexChangeAlert").scrollTop(messageCount * 100);
-}
 
 $(function () {
     $("form").on('submit', function (e) {
@@ -443,6 +389,7 @@ $(function () {
             plotsSize = false;
         }
     });
+
     $('input#delta').change(function () {
         if ($('input[id=delta]').is(':checked')) {
             plotDelta = true;
@@ -474,75 +421,21 @@ $(function () {
 
     // Plot Data
     $("#btn-plot").click(function () {
-
-        flushData();
-
         if (chart !== null) {
             chart.destroy();
         }
 
         var jsonObject = makeJsonFromTable("resultsTable");
 
-        if (jsonObject !== null && jsonObject !== undefined) {
-            if (jsonObject.count > 0) {
-                var key;
-                var totalSize = [];
-                var dataSets = [];
-                var indexTypes = [];
-                var j = 0;
+        // Conduct operation in worker thread
+        callWorker("./ChartDataSetBuilder.js", {'cmds': ['plotsSize', 'plotDelta', 'plotTypeTotal', 'createDataSet'],
+            'values': [plotsSize, plotDelta, plotTypeTotal, jsonObject]});
+    });
 
-                // Collect the data and agregate per index type
-                for (var i = 0; i < jsonObject.count; i++) {
-                    //jsonObject.value[i].DateTime;
-                    //jsonObject.value[i].Message;
-
-                    totalSize[i] = new DataPoint(jsonObject.value[i].Seconds, jsonObject.value[i].TotalSize);
-
-                    key = jsonObject.value[i].IndexType;
-                    j = DataTypeHash[key].index;
-                    if (plotsSize) {
-                        DataTypeHash[key].ySizeData[j] = new DataPoint(jsonObject.value[i].Seconds, jsonObject.value[i].Size);
-                    }
-                    if (plotDelta) {
-                        DataTypeHash[key].yDeltaData[j] = new DataPoint(jsonObject.value[i].Seconds, jsonObject.value[i].Delta);
-                    }
-                    if (plotTypeTotal) {
-                        DataTypeHash[key].yTypeTotalData[j] = new DataPoint(jsonObject.value[i].Seconds, jsonObject.value[i].TypeTotal);
-                    }
-                    DataTypeHash[key].index++;
-
-                    if (!indexTypes.includes(key)) {
-                        indexTypes.push(key);
-                    }
-                }
-
-                // Create the plot DataSets
-                var label;
-                var type;
-                for (j = 0; j < indexTypes.length; j++) {
-
-                    type = indexTypes[j];
-
-                    if (DataTypeHash[type].index > 0) {
-                        if (plotsSize) {
-                            label = "Size:" + type;
-                            dataSets.push(new DataSet(label, DataTypeHash[type].ySizeData, true, false, getRandomColor()));
-                        }
-                        if (plotDelta) {
-                            label = "DeltaSize:" + type;
-                            dataSets.push(new DataSet(label, DataTypeHash[type].yDeltaData, true, false, getRandomColor()));
-                        }
-                        if (plotTypeTotal) {
-                            label = "TypeTotal:" + type;
-                            dataSets.push(new DataSet(label, DataTypeHash[type].yTypeTotalData, true, false, getRandomColor()));
-                        }
-                    }
-                }
-
-                dataSets.push(new DataSet("Total Size", totalSize, true, false, getRandomColor()));
-
-                plot(dataSets);
-            }
-        }
+    // Close the plot
+    $(".close").click(function () {
+        stopWorker();
     });
 });
+
+
