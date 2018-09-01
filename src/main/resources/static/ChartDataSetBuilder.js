@@ -188,7 +188,9 @@ function createDataSet(jsonObject) {
 
             dataSets.push(new DataSet("Total Size", totalSize, true, false, getRandomColor()));
 
-            self.postMessage(dataSets);
+            //Using Transferrable objects
+            var ab = new ArrayBuffer(dataSets);
+            self.postMessage(dataSets, [ab]);
         }
     }
 }

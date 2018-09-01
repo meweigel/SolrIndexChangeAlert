@@ -127,7 +127,7 @@ function showMessageAlert(message) {
             clearTable();
             dataFeedFlag = false;
         }
-        
+
         messageCount++;
         count++;
 
@@ -214,7 +214,7 @@ function callWorker(javaScript, data) {
         var ab = new ArrayBuffer(data);
         workerThread.postMessage(data, [ab]);
     } else {
-        document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
+        $("#errorMsg").innerHTML = "Sorry! No Web Worker support.";
     }
 }
 
@@ -226,7 +226,7 @@ function stopWorker() {
 
 function plot(dataSet) {
 
-    var ctx = document.getElementById("solrLineChart");
+    var ctx = $("#solrLineChart");
 
     chart = new Chart(ctx, {
         type: 'scatter',
@@ -234,26 +234,28 @@ function plot(dataSet) {
             datasets: dataSet
         },
         options: {
-            //            responsive: true,
+            responsive: true,
             title: {
                 display: true,
-                fontSize: 20,
+                fontSize: 24,
                 text: 'Size (KB) of Solr Index Types Vs. Elapsed Time (sec)'
             },
-            //            tooltips: {
-            //                mode: 'index',
-            //                intersect: false,
-            //            },
-            //            hover: {
-            //                mode: 'nearest',
-            //                intersect: true
-            //            },
+            multiTooltipTemplate: function (self) {
+                return self.label[self.datasetLabel] + ': ' + self.value;
+            },
+//            tooltips: {
+//                mode: 'label',
+//            },
+//            hover: {
+//                mode: 'nearest',
+//                intersect: true
+//            },
             scales: {
                 xAxes: [{
                         display: true,
                         scaleLabel: {
                             display: true,
-                            labelString: 'Seconds'
+                            labelString: 'Time (Seconds)'
                         },
                         position: 'bottom',
                         gridLines: {
@@ -271,7 +273,14 @@ function plot(dataSet) {
                         display: true,
                         type: 'logarithmic',
                         ticks: {
-                            beginAtZero: true
+                            userCallback: function (tick) {
+                                var remain = tick / (Math.pow(10, Math.floor(Chart.helpers.log10(tick))));
+                                if (remain === 1 || remain === 10 || remain === 100 || remain === 1000 ||
+                                        remain === 10000 || remain === 100000 || remain === 1000000 || remain === 10000000) {
+                                    return "10^" + Chart.helpers.log10(tick) + " Kb";
+                                }
+                                return '';
+                            },
                         },
                         scaleLabel: {
                             display: true,
