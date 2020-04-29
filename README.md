@@ -75,6 +75,10 @@ RECENT UPGRADE CHANGES 8-31-18
 
 6) The HTML5 Web Worker utilizes Transferrable objects for speed.
 
+Future goals:
+-------------
+* Store collected data in MongoDB
+
 
 
 
