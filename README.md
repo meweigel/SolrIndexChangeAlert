@@ -75,6 +75,17 @@ RECENT UPGRADE CHANGES 8-31-18
 
 6) The HTML5 Web Worker utilizes Transferrable objects for speed.
 
+
+RECENT UPGRADE CHANGES 5-03-20
+------------------------------
+1) Upgraded dependency versions
+
+2) Added auto-detection of index directories from INDEX_FOLDER_ROOT (config.properties)
+
+3) Multiple FileAlterationMonitor threads started for each index dir found.
+
+
+
 Future goals:
 -------------
 * Store collected data in MongoDB

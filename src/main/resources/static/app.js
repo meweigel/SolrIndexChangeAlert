@@ -114,7 +114,7 @@ function getDateTime() {
 
 function showMessageAlert(message) {
     var text = message.split("|");
-    if (text.length == 2) {
+    if (text.length === 2) {
         $("#indexChangeAlert").append("<tr><td id='time'>" +
                 text[0] +
                 "</td><td id='elapsedTime'>N/A</td><td id='message'>" +
@@ -122,7 +122,7 @@ function showMessageAlert(message) {
                 "</td><td id='type'>N/A</td><td id='size'>N/A</td><td id='delta'>N/A</td>" +
                 "<td id='totalSize'>N/A</td><td id='typeTotal'>N/A</td></tr>");
         dataFeedFlag = true;
-    } else if (text.length == 8) {
+    } else if (text.length === 8) {
         if (dataFeedFlag) {
             clearTable();
             dataFeedFlag = false;
@@ -149,7 +149,7 @@ function showMessageAlert(message) {
                 text[7] +
                 "</td></tr>");
 
-        if (count == 50) {
+        if (count === 50) {
             appendTableRows();
         } else {
             timer();
@@ -304,8 +304,7 @@ $(function () {
         if (collection.length > 0) {
             connect();
             var shard = $("#shard").val();
-            var alertMessage = new AlertMessage("|Connect Index Monitoring Collection:" +
-                    collection + ":" + shard, Command.START_INDEX_MONITOR);
+            var alertMessage = new AlertMessage("|Connect Index Monitoring Collection:" + collection, Command.START_INDEX_MONITOR);
             setTimeout(function () {
                 sendMessage(alertMessage);
             }, 1000);

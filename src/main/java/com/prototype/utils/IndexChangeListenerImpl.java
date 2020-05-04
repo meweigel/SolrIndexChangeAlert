@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.prototype.client.StompMessageClient;
 import static com.prototype.utils.Command.RECEIVE_EVENT;
 import java.util.HashMap;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
 
 /*
  * Copyright 2014 the original author or authors.
@@ -34,8 +35,8 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexChangeListenerImpl.class);
     private final StompMessageClient client;
-    private HashMap<String, Long> sizeMap;
-    private HashMap<String, Long> typeTotalSizeMap;
+    private final HashMap<String, Long> sizeMap;
+    private final HashMap<String, Long> typeTotalSizeMap;
     private boolean directoryCreate;
     private boolean directoryChange;
     private boolean directoryDelete;
@@ -158,10 +159,10 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
                 }
 
                 sizeMap.put(name, sizeKb);
-                String msg = "Index - " + name +
-                        " was created|" + suffix + "|" + sizeKb + 
-                        "|" + sizeKb + "|" + 
-                        totalSize + "|" + typeTotalSizeMap.get(suffix);
+                String msg = "Index - " + name
+                        + " was created|" + suffix + "|" + sizeKb
+                        + "|" + sizeKb + "|"
+                        + totalSize + "|" + typeTotalSizeMap.get(suffix);
                 LOGGER.info("onFileCreate() " + msg);
                 client.sendMessage(msg, RECEIVE_EVENT);
             } catch (Exception e) {
@@ -191,10 +192,10 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
                     typeTotalSizeMap.put(suffix, typeTotalSize);
                 }
 
-                String msg = "Index - " + name +
-                        " was changed|" + suffix + "|" + sizeKb + 
-                        "|" + delta + "|" + totalSize + 
-                        "|" + typeTotalSizeMap.get(suffix);
+                String msg = "Index - " + name
+                        + " was changed|" + suffix + "|" + sizeKb
+                        + "|" + delta + "|" + totalSize
+                        + "|" + typeTotalSizeMap.get(suffix);
                 LOGGER.info("onFileChange() " + msg);
                 client.sendMessage(msg, RECEIVE_EVENT);
             } catch (Exception e) {
@@ -222,10 +223,10 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
                     typeTotalSizeMap.put(suffix, typeTotalSize);
                 }
 
-                String msg = "Index - " + name +
-                        " was deleted|" + suffix + "|0|" + 
-                        -sizeKb + "|" + totalSize + 
-                        "|" + typeTotalSizeMap.get(suffix);
+                String msg = "Index - " + name
+                        + " was deleted|" + suffix + "|0|"
+                        + -sizeKb + "|" + totalSize
+                        + "|" + typeTotalSizeMap.get(suffix);
                 sizeMap.put(name, 0L);
                 LOGGER.info("onFileDelete() " + msg);
                 client.sendMessage(msg, RECEIVE_EVENT);
@@ -246,56 +247,30 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
     }
 
     /**
-     * Set boolean to watch for Directory Create
      *
-     * @param choice
+     * @param command Enum
+     * @param state true or false
      */
-    public void setWatchDirectoryCreate(boolean choice) {
-        directoryCreate = choice;
-    }
-
-    /**
-     * Set boolean to watch for Directory Change
-     *
-     * @param choice
-     */
-    public void setWatchDirectoryChange(boolean choice) {
-        directoryChange = choice;
-    }
-
-    /**
-     * Set boolean to watch for Directory Delete
-     *
-     * @param choice
-     */
-    public void setWatchDirectoryDelete(boolean choice) {
-        directoryDelete = choice;
-    }
-
-    /**
-     * Set boolean to watch for File Create
-     *
-     * @param choice
-     */
-    public void setWatchFileCreate(boolean choice) {
-        fileCreate = choice;
-    }
-
-    /**
-     * Set boolean to watch for File Change
-     *
-     * @param choice
-     */
-    public void setWatchFileChange(boolean choice) {
-        fileChange = choice;
-    }
-
-    /**
-     * Set boolean to watch for File Delete
-     *
-     * @param choice
-     */
-    public void setWatchFileDelete(boolean choice) {
-        fileDelete = choice;
+    public void setWatch(Command command, boolean state) {
+        switch (command) {
+            case WATCH_DIR_CREATE:
+                directoryCreate = state;
+                break;
+            case WATCH_DIR_CHANGE:
+                directoryChange = state;
+                break;
+            case WATCH_DIR_DELETE:
+                directoryDelete = state;
+                break;
+            case WATCH_FILE_CREATE:
+                fileCreate = state;
+                break;
+            case WATCH_FILE_CHANGE:
+                fileChange = state;
+                break;
+            case WATCH_FILE_DELETE:
+                fileDelete = state;
+                break;
+        }
     }
 }

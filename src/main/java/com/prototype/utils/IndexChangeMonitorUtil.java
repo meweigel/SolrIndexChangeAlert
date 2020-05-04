@@ -40,14 +40,12 @@ public class IndexChangeMonitorUtil {
      *
      * @param client StompMessageClient used for routing messages to a
      * subscribed endpoint
-     * @param collection Name of Collection
+     * @param indexFolder An Index Folder
      * @return FileAlterationMonitor
      *
      * @throws Exception
      */
-    public static FileAlterationMonitor monitorSolr(StompMessageClient client, String collection, String shard) throws Exception {
-        String indexFolder = AppConstants.INDEX_FOLDER.replace("$", collection);
-        indexFolder = indexFolder.replace("#", shard);
+    public static FileAlterationMonitor monitorSolr(StompMessageClient client, String indexFolder) throws Exception {
         File directory = new File(indexFolder);
         FileAlterationMonitor monitor = null;
 
@@ -74,7 +72,7 @@ public class IndexChangeMonitorUtil {
             // Start the FileAlterationMonitor thread
             monitor.start();
 
-            LOGGER.info("monitorSolr() The FileAlterationMonitor thread was started");
+            LOGGER.info("monitorSolr() A FileAlterationMonitor thread was started");
         } else {
             LOGGER.error("monitorSolr() Invalid directory: " + directory.getAbsolutePath());
         }
