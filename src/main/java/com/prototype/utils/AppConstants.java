@@ -35,7 +35,9 @@ public final class AppConstants {
     public static final String TOPIC_ENDPOINT = "/topic/responseMessage";
     public static final String WS_ENDPOINT = "/gs-guide-websocket";
     public static final String[] INDEX_FILE_EXTS = {"cfe", "cfs", "doc", "dvd",
-        "dvm", "fdt", "fdx", "fnm", "lock", "nvd", "nvm", "pos", "si", "tim", "tip"};
+        "dvm", "fdt", "fdx", "fnm", "lock", "nvd", "nvm", "pos", "si", "tim", 
+        "tip", "dii", "dim", "fdm", "pay", "tvd", "tvm", "tvx", "segments_3"};
+    
     public static final int POLL_INTERVAL = 2000; // Milliseconds
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
@@ -43,14 +45,14 @@ public final class AppConstants {
     public static String PROXY_HOST = "";
     public static String PROXY_PORT = "";
     
-    public static final String[] MESSAGES = {"|A Solr index change montitor was started",
-                                             "|A Solr index change montitor was stopped",
-                                             "|Watching for directory creation: ",
-                                             "|Watching for directory change: ",
-                                             "|Watching for directory deletion: ",
-                                             "|Watching for file creation: ",
-                                             "|Watching for file change: ",
-                                             "|Watching for file deletion: "};
+    public static final String[] MESSAGES = {"A Solr index change montitor was started",
+                                             "A Solr index change montitor was stopped",
+                                             "Watching for directory creation: ",
+                                             "Watching for directory change: ",
+                                             "Watching for directory deletion: ",
+                                             "Watching for file creation: ",
+                                             "Watching for file change: ",
+                                             "Watching for file deletion: "};
     static {
         try (InputStream inputStream = new FileInputStream(CONFIG_DIR_FILE)) {
             Properties defaultProps = new Properties();

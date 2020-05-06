@@ -6,9 +6,9 @@ import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.prototype.client.StompMessageClient;
+import com.prototype.model.AlertMessage;
 import static com.prototype.utils.Command.RECEIVE_EVENT;
 import java.util.HashMap;
-import org.apache.commons.io.monitor.FileAlterationMonitor;
 
 /*
  * Copyright 2014 the original author or authors.
@@ -80,10 +80,18 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
                 totalSize += sizeKb;
                 String name = directory.getName();
                 sizeMap.put(name, sizeKb);
-                String msg = "Directory - " + name
-                        + " was created|N/A|" + sizeKb + "|" + sizeKb + "|" + totalSize + "|N/A";
+                String msg = "Directory - " + name + " was created";
+
+                AlertMessage message = new AlertMessage();
+                message.setCommand(RECEIVE_EVENT);
+                message.setAlert(msg);
+                message.setIndexType(name);
+                message.setSizeKb(sizeKb);
+                message.setDeltaKb(sizeKb);
+                message.setTotalSizeKb(totalSize);
+
                 LOGGER.info("onDirectoryCreate() " + msg);
-                client.sendMessage(msg, RECEIVE_EVENT);
+                client.sendMessage(message);
             } catch (Exception e) {
                 LOGGER.error("onDirectoryCreate() ", e);
             }
@@ -104,10 +112,19 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
                 long delta = (sizeKb - sizeMap.get(name));
                 totalSize += delta;
                 sizeMap.put(name, sizeKb);
-                String msg = "Directory - " + name
-                        + " was changed|N/A|" + sizeKb + "|" + delta + "|" + totalSize + "|N/A";
+                String msg = "Directory - " + name + " was changed";
+
                 LOGGER.info("onDirectoryChange() " + msg);
-                client.sendMessage(msg, RECEIVE_EVENT);
+
+                AlertMessage message = new AlertMessage();
+                message.setCommand(RECEIVE_EVENT);
+                message.setAlert(msg);
+                message.setIndexType(name);
+                message.setSizeKb(sizeKb);
+                message.setDeltaKb(delta);
+                message.setTotalSizeKb(totalSize);
+
+                client.sendMessage(message);
             } catch (Exception e) {
                 LOGGER.error("onDirectoryChange() ", e);
             }
@@ -126,11 +143,19 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
                 String name = directory.getName();
                 long sizeKb = sizeMap.get(name);
                 totalSize -= sizeKb;
-                String msg = "Directory - " + name
-                        + " was deleted|N/A|0|" + -sizeKb + "|" + totalSize + "|N/A";
+                String msg = "Directory - " + name + " was deleted";
                 sizeMap.put(name, 0L);
                 LOGGER.info("onDirectoryDelete() " + msg);
-                client.sendMessage(msg, RECEIVE_EVENT);
+
+                AlertMessage message = new AlertMessage();
+                message.setCommand(RECEIVE_EVENT);
+                message.setAlert(msg);
+                message.setIndexType(name);
+                message.setSizeKb(0);
+                message.setDeltaKb(-sizeKb);
+                message.setTotalSizeKb(totalSize);
+
+                client.sendMessage(message);
             } catch (Exception e) {
                 LOGGER.error("onDirectoryDelete() ", e);
             }
@@ -159,12 +184,19 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
                 }
 
                 sizeMap.put(name, sizeKb);
-                String msg = "Index - " + name
-                        + " was created|" + suffix + "|" + sizeKb
-                        + "|" + sizeKb + "|"
-                        + totalSize + "|" + typeTotalSizeMap.get(suffix);
+                String msg = "Index - " + name + " was created";
                 LOGGER.info("onFileCreate() " + msg);
-                client.sendMessage(msg, RECEIVE_EVENT);
+
+                AlertMessage message = new AlertMessage();
+                message.setCommand(RECEIVE_EVENT);
+                message.setAlert(msg);
+                message.setIndexType(suffix);
+                message.setSizeKb(sizeKb);
+                message.setDeltaKb(sizeKb);
+                message.setTotalSizeKb(totalSize);
+                message.setTypeTotalKb(typeTotalSizeMap.get(suffix));
+
+                client.sendMessage(message);
             } catch (Exception e) {
                 LOGGER.error("onFileCreate() ", e);
             }
@@ -181,6 +213,7 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
         if (fileChange) {
             try {
                 String name = file.getName();
+                
                 long sizeKb = file.length() / 1000;
                 long delta = (sizeKb - sizeMap.get(name));
                 totalSize += delta;
@@ -192,12 +225,19 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
                     typeTotalSizeMap.put(suffix, typeTotalSize);
                 }
 
-                String msg = "Index - " + name
-                        + " was changed|" + suffix + "|" + sizeKb
-                        + "|" + delta + "|" + totalSize
-                        + "|" + typeTotalSizeMap.get(suffix);
+                String msg = "Index - " + name + " was changed";
                 LOGGER.info("onFileChange() " + msg);
-                client.sendMessage(msg, RECEIVE_EVENT);
+
+                AlertMessage message = new AlertMessage();
+                message.setCommand(RECEIVE_EVENT);
+                message.setAlert(msg);
+                message.setIndexType(suffix);
+                message.setSizeKb(sizeKb);
+                message.setDeltaKb(delta);
+                message.setTotalSizeKb(totalSize);
+                message.setTypeTotalKb(typeTotalSizeMap.get(suffix));
+
+                client.sendMessage(message);
             } catch (Exception e) {
                 LOGGER.error("onFileChange() ", e);
             }
@@ -223,13 +263,20 @@ public class IndexChangeListenerImpl implements FileAlterationListener {
                     typeTotalSizeMap.put(suffix, typeTotalSize);
                 }
 
-                String msg = "Index - " + name
-                        + " was deleted|" + suffix + "|0|"
-                        + -sizeKb + "|" + totalSize
-                        + "|" + typeTotalSizeMap.get(suffix);
+                String msg = "Index - " + name + " was deleted";
                 sizeMap.put(name, 0L);
                 LOGGER.info("onFileDelete() " + msg);
-                client.sendMessage(msg, RECEIVE_EVENT);
+
+                AlertMessage message = new AlertMessage();
+                message.setCommand(RECEIVE_EVENT);
+                message.setAlert(msg);
+                message.setIndexType(suffix);
+                message.setSizeKb(0);
+                message.setDeltaKb(-sizeKb);
+                message.setTotalSizeKb(totalSize);
+                message.setTypeTotalKb(typeTotalSizeMap.get(suffix));
+
+                client.sendMessage(message);
             } catch (Exception e) {
                 LOGGER.error("onFileDelete() ", e);
             }

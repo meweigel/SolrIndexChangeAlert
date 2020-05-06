@@ -39,7 +39,7 @@ dependencies {
     compile("org.webjars:bootstrap:4.4.1-1")
     compile("org.webjars:jquery:3.5.0")
     compile("org.slf4j:log4j-over-slf4j:1.7.30")
-
-	
+    compile("com.google.code.gson:gson:2.8.6")
+    
     testCompile("org.springframework.boot:spring-boot-starter-test:2.2.6.RELEASE")
 }

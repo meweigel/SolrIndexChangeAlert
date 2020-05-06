@@ -84,6 +84,7 @@ RECENT UPGRADE CHANGES 5-03-20
 
 3) Multiple FileAlterationMonitor threads started for each index dir found.
 
+4) Supports Solr Cloud
 
 
 Future goals:

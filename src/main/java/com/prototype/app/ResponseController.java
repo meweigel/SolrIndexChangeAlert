@@ -27,9 +27,11 @@ import static com.prototype.utils.Command.WATCH_FILE_DELETE;
 import com.prototype.utils.IndexChangeListenerImpl;
 import com.prototype.utils.IndexChangeMonitorUtil;
 import com.prototype.utils.IterateFiles;
+import com.prototype.utils.JsonSerializer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 
 /*
  * Copyright 2014 the original author or authors.
@@ -51,24 +53,26 @@ import java.util.List;
  * @author mweigel
  *
  *
- * This clas controls the routing and processing of WebSocket messages
+ * This class controls the processing and routing of WebSocket messages
  */
 @Controller
 public class ResponseController {
-
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseController.class);
     private boolean started;
     private long startTime;
     private final List<FileAlterationMonitor> monitorRefList;
     private final List<IndexChangeListenerImpl> indexChangeListenerImplList;
+    private final JsonSerializer jsonSerializer;
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat();
-
+    
     public ResponseController() {
         DATE_FORMATTER.applyPattern(AppConstants.DATE_FORMAT);
         started = false;
         startTime = 0L;
         monitorRefList = new ArrayList<>();
         indexChangeListenerImplList = new ArrayList<>();
+        jsonSerializer = new JsonSerializer();
     }
 
     /**
@@ -82,10 +86,9 @@ public class ResponseController {
     @MessageMapping(AppConstants.APP_ENDPOINT)
     @SendTo(AppConstants.TOPIC_ENDPOINT)
     public ResponseMessage onMessageReceived(AlertMessage message) throws Exception {
-        long elapsedTime;
         long currentTime = System.currentTimeMillis();
         String dateTimeString = DATE_FORMATTER.format(new Date(currentTime));
-        boolean state = message.getAlert().contains("true");
+        boolean state = message.isActive();
         Command command = message.getCommand();
 
         // StompMessageClient will run as background thread when
@@ -93,16 +96,11 @@ public class ResponseController {
         switch (command) {
             case START_INDEX_MONITOR:
                 if (!started) {
-                    started = startIndexMonitors(message, dateTimeString);
+                    startIndexMonitors(message, dateTimeString);
                 }
                 break;
             case STOP_INDEX_MONITOR:
-                for (FileAlterationMonitor monitorRef : monitorRefList) {
-                    monitorRef.stop();
-                    started = false;
-                    startTime = 0L;
-                    message.setAlert(dateTimeString + MESSAGES[command.value]);
-                }
+                stopIndexMonitors(message, dateTimeString, command);
                 break;
             case WATCH_DIR_CREATE:
             case WATCH_DIR_CHANGE:
@@ -112,53 +110,84 @@ public class ResponseController {
             case WATCH_FILE_DELETE:
                 for (IndexChangeListenerImpl indexChangeListenerImpl : indexChangeListenerImplList) {
                     indexChangeListenerImpl.setWatch(command, state);
-                    message.setAlert(dateTimeString + MESSAGES[command.value] + state);
+                    message.setDateTimeStamp(dateTimeString);
+                    message.setActive(state);
+                    message.setAlert(MESSAGES[command.value]);
                 }
                 break;
             default:
                 if (startTime == 0) {
                     startTime = currentTime;
                 }
-                elapsedTime = ((currentTime - startTime) / 1000);
-                message.setAlert(dateTimeString + "|" + elapsedTime + "|" + message.getAlert());
+                
+                message.setElapsedTime(((currentTime - startTime) / 1000));
+                message.setDateTimeStamp(dateTimeString);
                 break;
         }
-
+        
         LOGGER.info("onMessageReceived() " + message.getAlert());
-
-        return new ResponseMessage(message.getAlert());
+        
+        //System.out.println("json AlertMessage = " + jsonSerializer.getJson(message));
+        
+        return new ResponseMessage(jsonSerializer.getJson(message));
     }
 
-    private boolean startIndexMonitors(AlertMessage message, String dateTimeString) {
-        boolean hasStarted = false;
-
+    /**
+     * Start all Index Monitors
+     *
+     * @param message
+     * @param dateTimeString
+     */
+    private void startIndexMonitors(AlertMessage message, String dateTimeString) {
+        
+        message.setDateTimeStamp(dateTimeString);
+        
         try {
-            String[] collection = message.getAlert().split(":", 2);
-            if (collection.length == 2) {
-                StompMessageClient client = StompMessageClient.getInstance(AppConstants.WS_ENDPOINT,
-                        AppConstants.TOPIC_ENDPOINT);
-
-                Collection<String> indexDirList = IterateFiles.getTargetFiles(AppConstants.INDEX_FOLDER_ROOT, "index", collection[1]);
-
-                for (String indexDir : indexDirList) {
-                    FileAlterationMonitor monitorRef = IndexChangeMonitorUtil.monitorSolr(client, indexDir);
-
-                    if (monitorRef != null) {
-                        monitorRefList.add(monitorRef);
-                        message.setAlert(dateTimeString + MESSAGES[0]);
-                        hasStarted = true;
-                        indexChangeListenerImplList.add(IndexChangeMonitorUtil.getIndexChangeListenerImpl());
-                    } else {
-                        message.setAlert(dateTimeString + "|Invalid Collection was entered!");
-                    }
+            StompMessageClient client = StompMessageClient.getInstance(AppConstants.WS_ENDPOINT,
+                    AppConstants.TOPIC_ENDPOINT);
+            
+            Collection<String> indexDirList = IterateFiles.getTargetFiles(AppConstants.INDEX_FOLDER_ROOT, "index", message.getCollection());
+            
+            for (String indexDir : indexDirList) {
+                
+                System.out.println("startIndexMonitors(): indexDir = " + indexDir);
+                
+                FileAlterationMonitor monitorRef = IndexChangeMonitorUtil.monitorSolr(client, indexDir);
+                
+                if (monitorRef != null) {
+                    monitorRefList.add(monitorRef);
+                    message.setAlert(MESSAGES[0]);
+                    started = true;
+                    message.setActive(started);
+                    indexChangeListenerImplList.add(IndexChangeMonitorUtil.getIndexChangeListenerImpl());
+                } else {
+                    message.setAlert("Invalid Collection was entered!");
                 }
-            } else {
-                message.setAlert(dateTimeString + "|You must enter a Collection Name");
             }
         } catch (Exception e) {
             LOGGER.error("onMessageReceived() " + e.toString());
         }
+    }
 
-        return hasStarted;
+    /**
+     * Stop all Index Monitors
+     *
+     * @param message
+     * @param dateTimeString
+     * @param command
+     */
+    private void stopIndexMonitors(AlertMessage message, String dateTimeString, Command command) {
+        for (FileAlterationMonitor monitorRef : monitorRefList) {
+            try {
+                monitorRef.stop();
+                started = false;
+                startTime = 0L;
+                message.setDateTimeStamp(dateTimeString);
+                message.setAlert(MESSAGES[command.value]);
+                message.setActive(started);
+            } catch (Exception ex) {
+                java.util.logging.Logger.getLogger(ResponseController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 }

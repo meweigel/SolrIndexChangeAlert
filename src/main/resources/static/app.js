@@ -74,8 +74,21 @@ function connect() {
             showMessageAlert(JSON.parse(response.body).content);
         });
 
-        stompClient.send("/topic/responseMessage", {},
-                JSON.stringify({'content': getDateTime() + "|WebSocket connection successfully made"}));
+        var alertMessage = {
+            "command": "START_INDEX_MONITOR",
+            "collection": $("#collection").val(),
+            "alert": "WebSocket connection successfully made:",
+            "dateTimeStamp": getDateTime(),
+            "indexType": " ",
+            "active": false,
+            "elapsedTime": 0,
+            "sizeKb": 0,
+            "deltaKb": 0,
+            "totalSizeKb": 0,
+            "typeTotalKb": 0
+        };
+
+        showMessageAlert(JSON.stringify(alertMessage));
     });
 }
 
@@ -113,51 +126,58 @@ function getDateTime() {
 }
 
 function showMessageAlert(message) {
-    var text = message.split("|");
-    if (text.length === 2) {
-        $("#indexChangeAlert").append("<tr><td id='time'>" +
-                text[0] +
-                "</td><td id='elapsedTime'>N/A</td><td id='message'>" +
-                text[1] +
-                "</td><td id='type'>N/A</td><td id='size'>N/A</td><td id='delta'>N/A</td>" +
-                "<td id='totalSize'>N/A</td><td id='typeTotal'>N/A</td></tr>");
-        dataFeedFlag = true;
-    } else if (text.length === 8) {
-        if (dataFeedFlag) {
-            clearTable();
-            dataFeedFlag = false;
-        }
 
-        messageCount++;
-        count++;
+    if (message !== undefined && message !== null) {
 
-        tableRows = tableRows.concat("<tr><td id='time'>" +
-                text[0] +
-                "</td><td id='elapsedTime'>" +
-                text[1] +
-                "</td><td id='message'>" +
-                text[2] +
-                "</td><td id='type'>" +
-                text[3] +
-                "</td><td id='size'>" +
-                text[4] +
-                "</td><td id='delta'>" +
-                text[5] +
-                "</td><td id='totalSize'>" +
-                text[6] +
-                "</td><td id='typeTotal'>" +
-                text[7] +
-                "</td></tr>");
+        var alertMessage = JSON.parse(message);
 
-        if (count === 50) {
-            appendTableRows();
+        if (alertMessage.command === "START_INDEX_MONITOR") {
+            $("#indexChangeAlert").append("<tr><td id='time'>" +
+                    alertMessage.dateTimeStamp +
+                    "</td><td id='elapsedTime'>N/A</td><td id='message'>" +
+                    alertMessage.alert + ":" + alertMessage.collection +
+                    "</td><td id='type'>N/A</td><td id='size'>N/A</td><td id='delta'>N/A</td>" +
+                    "<td id='totalSize'>N/A</td><td id='typeTotal'>N/A</td></tr>");
+            dataFeedFlag = true;
         } else {
-            timer();
-        }
-    }
+            if (dataFeedFlag) {
+                clearTable();
+                dataFeedFlag = false;
+            }
 
-    //$("#indexChangeAlert").scroll();
-    $("#indexChangeAlert").scrollTop(messageCount * 100);
+            messageCount++;
+            count++;
+
+            tableRows = tableRows.concat("<tr><td id='time'>" +
+                    alertMessage.dateTimeStamp +
+                    "</td><td id='elapsedTime'>" +
+                    alertMessage.elapsedTime +
+                    "</td><td id='message'>" +
+                    alertMessage.alert +
+                    "</td><td id='type'>" +
+                    alertMessage.indexType +
+                    "</td><td id='size'>" +
+                    alertMessage.sizeKb +
+                    "</td><td id='delta'>" +
+                    alertMessage.deltaKb +
+                    "</td><td id='totalSize'>" +
+                    alertMessage.totalSizeKb +
+                    "</td><td id='typeTotal'>" +
+                    alertMessage.typeTotalKb +
+                    "</td></tr>");
+
+            if (count === 50) {
+                appendTableRows();
+            } else {
+                timer();
+            }
+        }
+
+        //$("#indexChangeAlert").scroll();
+        $("#indexChangeAlert").scrollTop(messageCount * 100);
+    } else {
+        console.log("showMessageAlert(): alertMessage is undefined or null");
+    }
 }
 
 function appendTableRows() {
@@ -303,8 +323,21 @@ $(function () {
         var collection = $("#collection").val();
         if (collection.length > 0) {
             connect();
-            var shard = $("#shard").val();
-            var alertMessage = new AlertMessage("|Connect Index Monitoring Collection:" + collection, Command.START_INDEX_MONITOR);
+
+            var alertMessage = {
+                "command": Command.START_INDEX_MONITOR,
+                "collection": collection,
+                "alert": "Connect Index Monitoring Collection",
+                "dateTimeStamp": getDateTime(),
+                "indexType": " ",
+                "active": false,
+                "elapsedTime": 0,
+                "sizeKb": 0,
+                "deltaKb": 0,
+                "totalSizeKb": 0,
+                "typeTotalKb": 0
+            };
+
             setTimeout(function () {
                 sendMessage(alertMessage);
             }, 1000);
@@ -323,7 +356,21 @@ $(function () {
         $("#size").prop("checked", false);
         $("#delta").prop("checked", false);
         $("#typeTotal").prop("checked", false);
-        var alertMessage = new AlertMessage("|Disconnect Index Monitoring", Command.STOP_INDEX_MONITOR);
+
+        var alertMessage = {
+            "command": Command.STOP_INDEX_MONITOR,
+            "collection": $("#collection").val(),
+            "alert": "Disconnect Index Monitoring",
+            "dateTimeStamp": getDateTime(),
+            "indexType": " ",
+            "active": true,
+            "elapsedTime": 0,
+            "sizeKb": 0,
+            "deltaKb": 0,
+            "totalSizeKb": 0,
+            "typeTotalKb": 0
+        };
+
         sendMessage(alertMessage);
         setTimeout(function () {
             disconnect()
@@ -331,61 +378,151 @@ $(function () {
     });
 
     $('input#directoryCreate').change(function () {
+
+        var alertMessage = {
+            "command": Command.WATCH_DIR_CREATE,
+            "collection": $("#collection").val(),
+            "alert": "",
+            "dateTimeStamp": getDateTime(),
+            "indexType": " ",
+            "active": true,
+            "elapsedTime": 0,
+            "sizeKb": 0,
+            "deltaKb": 0,
+            "totalSizeKb": 0,
+            "typeTotalKb": 0
+        };
+
         if ($('input[id=directoryCreate]').is(':checked')) {
-            var alertMessage = new AlertMessage("|Watch Directory Create:true", Command.WATCH_DIR_CREATE);
+            alertMessage.alert = "Watch Directory Create:true";
             sendMessage(alertMessage);
         } else {
-            var alertMessage = new AlertMessage("|Watch Directory Create:false", Command.WATCH_DIR_CREATE);
+            alertMessage.alert = "Watch Directory Create:false";
             sendMessage(alertMessage);
         }
     });
 
     $('input#directoryChange').change(function () {
+
+        var alertMessage = {
+            "command": Command.WATCH_DIR_CHANGE,
+            "collection": $("#collection").val(),
+            "alert": "",
+            "dateTimeStamp": getDateTime(),
+            "indexType": " ",
+            "active": true,
+            "elapsedTime": 0,
+            "sizeKb": 0,
+            "deltaKb": 0,
+            "totalSizeKb": 0,
+            "typeTotalKb": 0
+        };
+
         if ($('input[id=directoryChange]').is(':checked')) {
-            var alertMessage = new AlertMessage("|Watch Directory Change:true", Command.WATCH_DIR_CHANGE);
+            alertMessage.alert = "Watch Directory Change:true";
             sendMessage(alertMessage);
         } else {
-            var alertMessage = new AlertMessage("|Watch Directory Change:false", Command.WATCH_DIR_CHANGE);
+            alertMessage.alert = "Watch Directory Change:false";
             sendMessage(alertMessage);
         }
     });
 
     $('input#directoryDelete').change(function () {
+
+        var alertMessage = {
+            "command": Command.WATCH_DIR_DELETE,
+            "collection": $("#collection").val(),
+            "alert": "",
+            "dateTimeStamp": getDateTime(),
+            "indexType": " ",
+            "active": true,
+            "elapsedTime": 0,
+            "sizeKb": 0,
+            "deltaKb": 0,
+            "totalSizeKb": 0,
+            "typeTotalKb": 0
+        };
+
         if ($('input[id=directoryDelete]').is(':checked')) {
-            var alertMessage = new AlertMessage("|Watch Directory Delete:true", Command.WATCH_DIR_DELETE);
+            alertMessage.alert = "Watch Directory Delete:true";
             sendMessage(alertMessage);
         } else {
-            var alertMessage = new AlertMessage("|Watch Directory Delete:false", Command.WATCH_DIR_DELETE);
+            alertMessage.alert = "Watch Directory Delete:false";
             sendMessage(alertMessage);
         }
     });
 
     $('input#indexCreate').change(function () {
+
+        var alertMessage = {
+            "command": Command.WATCH_FILE_CREATE,
+            "collection": $("#collection").val(),
+            "alert": "",
+            "dateTimeStamp": getDateTime(),
+            "indexType": " ",
+            "active": true,
+            "elapsedTime": 0,
+            "sizeKb": 0,
+            "deltaKb": 0,
+            "totalSizeKb": 0,
+            "typeTotalKb": 0
+        };
+
         if ($('input[id=indexCreate]').is(':checked')) {
-            var alertMessage = new AlertMessage("|Watch File Create:true", Command.WATCH_FILE_CREATE);
+            alertMessage.alert = "Watch File Create:true";
             sendMessage(alertMessage);
         } else {
-            var alertMessage = new AlertMessage("|Watch File Create:false", Command.WATCH_FILE_CREATE);
+            alertMessage.alert = "Watch File Create:false";
             sendMessage(alertMessage);
         }
     });
 
     $('input#indexChange').change(function () {
+
+        var alertMessage = {
+            "command": Command.WATCH_FILE_CHANGE,
+            "collection": $("#collection").val(),
+            "alert": "",
+            "dateTimeStamp": getDateTime(),
+            "indexType": " ",
+            "active": true,
+            "elapsedTime": 0,
+            "sizeKb": 0,
+            "deltaKb": 0,
+            "totalSizeKb": 0,
+            "typeTotalKb": 0
+        };
+
         if ($('input[id=indexChange]').is(':checked')) {
-            var alertMessage = new AlertMessage("|Watch File Change:true", Command.WATCH_FILE_CHANGE);
+            alertMessage.alert = "Watch File Change:true";
             sendMessage(alertMessage);
         } else {
-            var alertMessage = new AlertMessage("|Watch File Change:false", Command.WATCH_FILE_CHANGE);
+            alertMessage.alert = "Watch File Change:false";
             sendMessage(alertMessage);
         }
     });
 
     $('input#indexDelete').change(function () {
+
+        var alertMessage = {
+            "command": Command.WATCH_FILE_DELETE,
+            "collection": $("#collection").val(),
+            "alert": "",
+            "dateTimeStamp": getDateTime(),
+            "indexType": " ",
+            "active": true,
+            "elapsedTime": 0,
+            "sizeKb": 0,
+            "deltaKb": 0,
+            "totalSizeKb": 0,
+            "typeTotalKb": 0
+        };
+
         if ($('input[id=indexDelete]').is(':checked')) {
-            var alertMessage = new AlertMessage("|Watch File Delete:true", Command.WATCH_FILE_DELETE);
+            alertMessage.alert = "Watch File Delete:true";
             sendMessage(alertMessage);
         } else {
-            var alertMessage = new AlertMessage("|Watch File Delete:false", Command.WATCH_FILE_DELETE);
+            alertMessage.alert = "Watch File Delete:false";
             sendMessage(alertMessage);
         }
     });

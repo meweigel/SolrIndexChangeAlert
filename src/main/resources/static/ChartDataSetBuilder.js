@@ -16,8 +16,8 @@ function DataPoint(x, y) {
     this.y = y;
 }
 
-var IndexTypes = ["cfe", "cfs", "doc", "dvd", "dvm", "fdt", "fdx", "fnm", "lock", "nvd", "nvm",
-    "pos", "si", "tim", "tip"];
+var indexTypes = ["cfe", "cfs", "doc", "dvd", "dvm", "fdt", "fdx", "fnm", "lock", "nvd", "nvm",
+    "pos", "si", "tim", "tip", "dii", "dim", "fdm", "pay", "tvd", "tvm", "tvx", "segments_3"];
 
 var DataTypeHash = {};
 
@@ -96,14 +96,54 @@ DataTypeHash["tip"].ySizeData = [];
 DataTypeHash["tip"].yDeltaData = [];
 DataTypeHash["tip"].yTypeTotalData = [];
 DataTypeHash["tip"].index = 0;
+DataTypeHash["dii"] = {};
+DataTypeHash["dii"].ySizeData = [];
+DataTypeHash["dii"].yDeltaData = [];
+DataTypeHash["dii"].yTypeTotalData = [];
+DataTypeHash["dii"].index = 0;
+DataTypeHash["dim"] = {};
+DataTypeHash["dim"].ySizeData = [];
+DataTypeHash["dim"].yDeltaData = [];
+DataTypeHash["dim"].yTypeTotalData = [];
+DataTypeHash["dim"].index = 0;
+DataTypeHash["fdm"] = {};
+DataTypeHash["fdm"].ySizeData = [];
+DataTypeHash["fdm"].yDeltaData = [];
+DataTypeHash["fdm"].yTypeTotalData = [];
+DataTypeHash["fdm"].index = 0;
+DataTypeHash["pay"] = {};
+DataTypeHash["pay"].ySizeData = [];
+DataTypeHash["pay"].yDeltaData = [];
+DataTypeHash["pay"].yTypeTotalData = [];
+DataTypeHash["pay"].index = 0;
+DataTypeHash["tvd"] = {};
+DataTypeHash["tvd"].ySizeData = [];
+DataTypeHash["tvd"].yDeltaData = [];
+DataTypeHash["tvd"].yTypeTotalData = [];
+DataTypeHash["tvd"].index = 0;
+DataTypeHash["tvm"] = {};
+DataTypeHash["tvm"].ySizeData = [];
+DataTypeHash["tvm"].yDeltaData = [];
+DataTypeHash["tvm"].yTypeTotalData = [];
+DataTypeHash["tvm"].index = 0;
+DataTypeHash["tvx"] = {};
+DataTypeHash["tvx"].ySizeData = [];
+DataTypeHash["tvx"].yDeltaData = [];
+DataTypeHash["tvx"].yTypeTotalData = [];
+DataTypeHash["tvx"].index = 0;
+DataTypeHash["segments_3"] = {};
+DataTypeHash["segments_3"].ySizeData = [];
+DataTypeHash["segments_3"].yDeltaData = [];
+DataTypeHash["segments_3"].yTypeTotalData = [];
+DataTypeHash["segments_3"].index = 0;
 
 
 function flushData() {
-    for (var i = 0; i < IndexTypes.length; i++) {
-        DataTypeHash[IndexTypes[i]].index = 0;
-        DataTypeHash[IndexTypes[i]].yTypeTotalData = [];
-        DataTypeHash[IndexTypes[i]].yDeltaData = [];
-        DataTypeHash[IndexTypes[i]].ySizeData = [];
+    for (var i = 0; i < indexTypes.length; i++) {
+        DataTypeHash[indexTypes[i]].index = 0;
+        DataTypeHash[indexTypes[i]].yTypeTotalData = [];
+        DataTypeHash[indexTypes[i]].yDeltaData = [];
+        DataTypeHash[indexTypes[i]].ySizeData = [];
     }
 }
 

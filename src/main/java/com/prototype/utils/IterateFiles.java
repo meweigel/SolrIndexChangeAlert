@@ -45,14 +45,24 @@ public class IterateFiles {
 
         Consumer<File> collect = fileFound -> {
             String fileName = fileFound.getAbsolutePath();
-            if(targets.length == 2){
-                if (fileName.contains(targets[0]) && fileName.contains(targets[1])) {
-                    // Get unique list from map later
-                   String dir = fileName.substring(0, fileName.indexOf(targets[0])+targets[0].length());
-                   //System.out.println("dir = " + dir);
-                   targetMap.put(dir, dir);
+            
+            boolean found = true;
+
+            for (int i = 0; i < targets.length; i++) {
+                if (!fileName.contains(targets[i])) {
+                    found = false;
+                    break;
                 }
             }
+
+            if (found) {
+                // Get unique list from map later
+                int i = fileName.indexOf(targets[0]);
+                int j = fileName.indexOf('/', i);
+                String dir = fileName.substring(0, j+1);
+                targetMap.put(dir, dir);
+            }
+
         };
 
         fetchFiles(file, collect);

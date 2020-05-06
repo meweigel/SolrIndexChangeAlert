@@ -18,7 +18,6 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 import com.prototype.model.AlertMessage;
 import com.prototype.model.ResponseMessage;
 import com.prototype.utils.AppConstants;
-import com.prototype.utils.Command;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -114,12 +113,11 @@ public class StompMessageClient {
      * The sendMessage client method for sending Stomp messages to the
      * topicEndPoint
      *
-     * @param message The plain text message (not yet JSON)
-     * @param command The command enum
+     * @param message The AlertMessage message
      */
-    public void sendMessage(String message, Command command) {
+    public void sendMessage(AlertMessage message) {
         try {
-            theSession.send("/app" + AppConstants.APP_ENDPOINT, new AlertMessage(message, command));
+            theSession.send("/app" + AppConstants.APP_ENDPOINT, message);
         } catch (Throwable t) {
             LOGGER.error("sendMessage() " + t.toString());
         }
