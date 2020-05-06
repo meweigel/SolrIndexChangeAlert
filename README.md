@@ -87,9 +87,20 @@ RECENT UPGRADE CHANGES 5-03-20
 4) Supports Solr Cloud
 
 
+RECENT UPGRADE CHANGES 5-05-20
+------------------------------
+1) I did some much needed refactoring.
+
+2) Added new index types that had been introduced to Solr.
+
+
+
 Future goals:
 -------------
-* Store collected data in MongoDB
+* Store collected data in MongoDB.
+  Currently data is collected by user determined short intervals for downloading
+  as JSON or for plotting, then the table is cleared. With mongoDB data will be
+  stored for long periods. Viewing will have to involve pagination based on scrolling.
 
 
 
