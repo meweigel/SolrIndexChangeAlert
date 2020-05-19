@@ -115,7 +115,7 @@ public class StompMessageClient {
      *
      * @param message The AlertMessage message
      */
-    public void sendMessage(AlertMessage message) {
+    synchronized public void sendMessage(AlertMessage message) {
         try {
             theSession.send("/app" + AppConstants.APP_ENDPOINT, message);
         } catch (Throwable t) {
