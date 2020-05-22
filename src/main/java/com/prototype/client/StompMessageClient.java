@@ -101,7 +101,7 @@ public class StompMessageClient {
      * @param topicEndPoint - The subscriber topic endpoint
      * @return StompMessageClient
      */
-    public static StompMessageClient getInstance(String wsEndpoint, String topicEndPoint) {
+    synchronized public static StompMessageClient getInstance(String wsEndpoint, String topicEndPoint) {
         if (stompMessageClient == null) {
             stompMessageClient = new StompMessageClient(wsEndpoint, topicEndPoint);
         }
